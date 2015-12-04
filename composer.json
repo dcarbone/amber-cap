@@ -1,0 +1,27 @@
+{
+    "name": "dcarbone/amber-hat",
+    "type": "library",
+    "description": "Lib designed to help PHP apps consume from REDCap's API",
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "Daniel Carbone",
+            "email": "daniel.p.carbone@gmail.com"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.3.3",
+        "ext-libxml": "*"
+    },
+
+    "require-dev": {
+        "phpunit/phpunit": "~4.8"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "DCarbone\\AmberHat\\": "src/"
+        }
+    }
+}
