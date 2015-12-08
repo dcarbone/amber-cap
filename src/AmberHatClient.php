@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\Metadata\MetadataCollection;
+use DCarbone\AmberHat\Project\ProjectInformation;
 use DCarbone\AmberHat\Record\RecordParser;
 
 /**
@@ -83,7 +84,7 @@ class AmberHatClient
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Arm\\ArmsCollection',
-            $this->_executeRequest('arm', array('arms' => $armNumbers))
+            $this->_executeRequest('arm', array('arms' => $armNumbers), false)
         );
     }
 
@@ -95,7 +96,7 @@ class AmberHatClient
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Event\\EventsCollection',
-            $this->_executeRequest('event', array('arms' => $armNumbers))
+            $this->_executeRequest('event', array('arms' => $armNumbers), false)
         );
     }
 
@@ -108,18 +109,33 @@ class AmberHatClient
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Metadata\\MetadataCollection',
-            $this->_executeRequest('metadata', array('forms' => $forms, 'fields' => $fields))
+            $this->_executeRequest('metadata', array('forms' => $forms, 'fields' => $fields), false)
         );
     }
 
     /**
-     * @param string $formName
+     * @return \DCarbone\AmberHat\Project\ProjectInformationInterface
+     */
+    public function getProjectInfo()
+    {
+        return ProjectInformation::createWithXMLString(
+            $this->_executeRequest('project', array(), true)
+        );
+    }
+
+    /**
+     * @param array $forms
+     * @param array $fields
+     * @param array $events
      * @param MetadataCollection|null $metadataCollection
      * @return RecordParser
      */
-    public function getFormRecords($formName, MetadataCollection $metadataCollection = null)
+    public function getRecords(array $forms = array(),
+                               array $fields = array(),
+                               array $events = array(),
+                               MetadataCollection $metadataCollection = null)
     {
-        $filename = $this->_executeRequest('record', array('forms' => $formName));
+        $filename = $this->_executeRequest('record', array('forms' => $forms, 'events' => $events, 'fields' => $fields), false);
 
         $this->_files[] = $filename;
 
@@ -146,17 +162,14 @@ class AmberHatClient
     /**
      * @param string $content
      * @param array $additionalParams
+     * @param bool $returnData
      * @return string
      */
-    private function _executeRequest($content, array $additionalParams = array())
+    private function _executeRequest($content, array $additionalParams = array(), $returnData = false)
     {
         $postFieldString = $this->_buildPostFields($content, $additionalParams);
 
-        $filename = sprintf('%s/%s.xml', $this->_tempDirectory, sha1($postFieldString));
-
-        $fh = fopen($filename, 'w+');
-
-        if ($fh)
+        if ($returnData)
         {
             $ch = curl_init($this->_redcapApiEndpoint);
 
@@ -165,23 +178,22 @@ class AmberHatClient
                 curl_setopt_array($ch, array(
                     CURLOPT_POST => true,
                     CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_FILE => $fh,
+                    CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POSTFIELDS => $postFieldString,
                     CURLOPT_SSL_VERIFYHOST => false,
                     CURLOPT_SSL_VERIFYPEER => false
                 ));
 
-                curl_exec($ch);
+                $data = curl_exec($ch);
 
                 if (($error = curl_error($ch)) === '')
                 {
-                    fclose($fh);
                     curl_close($ch);
-                    return $filename;
+                    return $data;
                 }
 
-                fclose($fh);
-                curl_close($ch);
+                if (gettype($ch) === 'resource')
+                    curl_close($ch);
 
                 throw new \RuntimeException(sprintf(
                     'Error received when querying for "%s" content.  Error: "%s"',
@@ -192,11 +204,56 @@ class AmberHatClient
 
             throw new \RuntimeException('Unable to initialize CURL resource.');
         }
+        else
+        {
+            $filename = sprintf('%s/%s.xml', $this->_tempDirectory, sha1($postFieldString));
 
-        throw new \RuntimeException(sprintf(
-            'Unable to open temp file "%s" for writing. Please check runtime permissions at location.',
-            $filename
-        ));
+            $fh = fopen($filename, 'w+');
+
+            if ($fh)
+            {
+                $ch = curl_init($this->_redcapApiEndpoint);
+
+                if ($ch)
+                {
+                    curl_setopt_array($ch, array(
+                        CURLOPT_POST => true,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_FILE => $fh,
+                        CURLOPT_POSTFIELDS => $postFieldString,
+                        CURLOPT_SSL_VERIFYHOST => false,
+                        CURLOPT_SSL_VERIFYPEER => false
+                    ));
+
+                    curl_exec($ch);
+
+                    if (($error = curl_error($ch)) === '')
+                    {
+                        fclose($fh);
+                        curl_close($ch);
+                        return $filename;
+                    }
+
+                    fclose($fh);
+
+                    if (gettype($ch) === 'resource')
+                        curl_close($ch);
+
+                    throw new \RuntimeException(sprintf(
+                        'Error received when querying for "%s" content.  Error: "%s"',
+                        $content,
+                        $error
+                    ));
+                }
+
+                throw new \RuntimeException('Unable to initialize CURL resource.');
+            }
+
+            throw new \RuntimeException(sprintf(
+                'Unable to open temp file "%s" for writing. Please check runtime permissions at location.',
+                $filename
+            ));
+        }
     }
 
     /**

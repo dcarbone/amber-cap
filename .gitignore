@@ -1,5 +1,7 @@
 composer.phar
 vendor/
+/phpunit.local.xml
+/phpunit.bat
 composer.lock
 
 # Commit your application's lock file http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file
@@ -36,6 +38,8 @@ composer.lock
 
 ## File-based project format:
 *.ipr
+/index.php
+/tmp
 *.iws
 
 ## Plugin-specific files:

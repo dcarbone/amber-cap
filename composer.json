@@ -9,14 +9,23 @@
             "email": "daniel.p.carbone@gmail.com"
         }
     ],
+    "keywords": [
+        "redcap",
+        "red cap"
+    ],
 
     "require": {
         "php": ">=5.3.3",
-        "ext-libxml": "*"
+        "ext-libxml": "*",
+        "ext-curl": "*"
     },
 
     "require-dev": {
         "phpunit/phpunit": "~4.8"
+    },
+
+    "suggest": {
+        "ext-openssl": "For that SSL goodness."
     },
 
     "autoload": {
