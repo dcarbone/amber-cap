@@ -25,6 +25,11 @@
  */
 abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \Iterator
 {
+    /** @var string */
+    protected static $rootNodeName = 'records';
+    /** @var string */
+    protected static $itemNodeName = 'item';
+
     /** @var array */
     private $_items = array();
 
@@ -198,15 +203,13 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
     {
         /** @var \DCarbone\AmberHat\AbstractAmberHatItem $itemClass */
 
-        $sxe = new \SimpleXMLElement($xml, LIBXML_COMPACT | LIBXML_NOCDATA);
+        $sxe = new \SimpleXMLElement($xml, LIBXML_COMPACT | LIBXML_NOBLANKS);
         if ($sxe instanceof \SimpleXMLElement)
         {
-            $itemElements = $sxe->xpath('item');
             $collection = new static();
-            foreach($itemElements as $itemElement)
+            foreach($sxe->xpath(static::$itemNodeName) as $itemElement)
             {
-                $item = $itemClass::itemFromSXE($itemElement);
-                $collection[$item[$keyProperty]] = $item;
+                static::addItemToCollection($collection, $itemClass::createFromSXE($itemElement), $keyProperty);
             }
             return $collection;
         }
@@ -236,11 +239,11 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
                 case \XMLReader::ELEMENT:
                     switch($xmlReader->name)
                     {
-                        case 'item':
+                        case static::$itemNodeName:
                             $item = new $itemClass();
                             continue 3;
 
-                        case 'records':
+                        case static::$rootNodeName:
                             continue 3;
 
                         default:
@@ -263,8 +266,8 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
                 case \XMLReader::END_ELEMENT:
                     switch($xmlReader->name)
                     {
-                        case 'item':
-                            $collection[$item[$keyProperty]] = $item;
+                        case static::$itemNodeName:
+                            static::addItemToCollection($collection, $item, $keyProperty);
                             $fieldName = null;
                             continue 3;
                     }
@@ -272,5 +275,18 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
         }
 
         return $collection;
+    }
+
+    /**
+     * @param AbstractAmberHatCollection $collection
+     * @param AmberHatItemInterface $item
+     * @param string $keyProperty
+     */
+    protected static function addItemToCollection(
+        AbstractAmberHatCollection $collection,
+        AmberHatItemInterface $item,
+        $keyProperty)
+    {
+        $collection[$item[$keyProperty]] = $item;
     }
 }

@@ -103,13 +103,24 @@ class AmberHatClient
     /**
      * @param array $forms
      * @param array $fields
-     * @return \DCarbone\AmberHat\Metadata\MetadataCollection
+     * @return MetadataCollection
      */
     public function getMetadata(array $forms = array(), array $fields = array())
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Metadata\\MetadataCollection',
             $this->_executeRequest('metadata', array('forms' => $forms, 'fields' => $fields), false)
+        );
+    }
+
+    /**
+     * @return \DCarbone\AmberHat\ExportFields\ExportFieldsCollection
+     */
+    public function getExportFields()
+    {
+        return $this->_createCollection(
+            '\\DCarbone\\AmberHat\\ExportFields\\ExportFieldsCollection',
+            $this->_executeRequest('exportFieldNames')
         );
     }
 
@@ -135,11 +146,9 @@ class AmberHatClient
                                array $events = array(),
                                MetadataCollection $metadataCollection = null)
     {
-        $filename = $this->_executeRequest('record', array('forms' => $forms, 'events' => $events, 'fields' => $fields), false);
-
-        $this->_files[] = $filename;
-
-        return RecordParser::recordParserFromXMLFile($filename, $metadataCollection);
+        return RecordParser::createWithXMLFile(
+            $this->_executeRequest('record', array('forms' => $forms, 'events' => $events, 'fields' => $fields)),
+            $metadataCollection);
     }
 
     /**
@@ -151,8 +160,6 @@ class AmberHatClient
     {
         /** @var \DCarbone\AmberHat\AbstractAmberHatCollection $collectionClass */
 
-        $this->_files[] = $filename;
-
         if (filesize($filename) < self::MAX_MEMORY_FILESIZE)
             return $collectionClass::createFromXMLString(file_get_contents($filename));
 
@@ -160,6 +167,8 @@ class AmberHatClient
     }
 
     /**
+     * TODO: Make this less messy
+     *
      * @param string $content
      * @param array $additionalParams
      * @param bool $returnData
@@ -231,6 +240,7 @@ class AmberHatClient
                     {
                         fclose($fh);
                         curl_close($ch);
+                        $this->_files[] = $filename;
                         return $filename;
                     }
 

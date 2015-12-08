@@ -34,7 +34,7 @@ class RecordParser
     private $_metadataCollection;
 
     /** @var string */
-    private $_saxResponseFieldName = null;
+    private $_saxExportFieldName = null;
 
     /** @var bool */
     private $_atEnd = false;
@@ -54,7 +54,7 @@ class RecordParser
      * @param MetadataCollection|null $metadataCollection
      * @return RecordParser
      */
-    public static function recordParserFromXMLFile($file, MetadataCollection $metadataCollection = null)
+    public static function createWithXMLFile($file, MetadataCollection $metadataCollection = null)
     {
         $xmlReader = new \XMLReader();
         $xmlReader->open($file);
@@ -91,11 +91,11 @@ class RecordParser
 
                         case 'item':
                             $firstField = true;
-                            $this->_saxResponseFieldName = null;
+                            $this->_saxExportFieldName = null;
                             continue 3;
 
                         default:
-                            $this->_saxResponseFieldName = $this->_xmlReader->name;
+                            $this->_saxExportFieldName = $this->_xmlReader->name;
                             if ($recordField instanceof RecordFieldInterface)
                             {
                                 $recordField->firstFieldInItem = $firstField;
@@ -106,7 +106,7 @@ class RecordParser
                     }
 
                 case \XMLReader::TEXT:
-                    if (null !== $this->_saxResponseFieldName)
+                    if (null !== $this->_saxExportFieldName)
                         $fieldValue = trim($this->_xmlReader->value);
                     continue 2;
 
@@ -127,9 +127,9 @@ class RecordParser
 
                         default:
                             $recordField = new RecordField(
-                                $this->_saxResponseFieldName,
+                                $this->_saxExportFieldName,
                                 $fieldValue,
-                                $this->_getMetadataItem($this->_saxResponseFieldName)
+                                $this->_getMetadataItem($this->_saxExportFieldName)
                             );
                     }
             }
@@ -138,21 +138,21 @@ class RecordParser
 
 
     /**
-     * @param string $responseFieldName
+     * @param string $exportFieldName
      * @return null|\DCarbone\AmberHat\Metadata\MetadataItemInterface
      */
-    private function _getMetadataItem($responseFieldName)
+    private function _getMetadataItem($exportFieldName)
     {
         if (!isset($this->_metadataCollection))
             return null;
 
-        if (isset($this->_metadataCollection[$responseFieldName]))
-            return $this->_metadataCollection[$responseFieldName];
+        if (isset($this->_metadataCollection[$exportFieldName]))
+            return $this->_metadataCollection[$exportFieldName];
 
-        $responseFieldName = preg_replace('/(___[a-zA-Z0-9]+$)/', '', $responseFieldName);
+        $exportFieldName = preg_replace('/(___[a-zA-Z0-9]+$)/', '', $exportFieldName);
 
-        if (isset($this->_metadataCollection[$responseFieldName]))
-            return $this->_metadataCollection[$responseFieldName];
+        if (isset($this->_metadataCollection[$exportFieldName]))
+            return $this->_metadataCollection[$exportFieldName];
 
         return null;
     }

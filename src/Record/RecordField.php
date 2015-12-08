@@ -28,7 +28,7 @@ use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 class RecordField implements RecordFieldInterface
 {
     /** @var string */
-    public $responseFieldName;
+    public $exportFieldName;
     /** @var string */
     public $fieldValue;
 
@@ -42,15 +42,15 @@ class RecordField implements RecordFieldInterface
 
     /**
      * Constructor
-     * @param string $responseFieldName
+     * @param string $exportFieldName
      * @param string $fieldValue
      * @param MetadataItemInterface|null $metadataItem
      */
-    public function __construct($responseFieldName,
+    public function __construct($exportFieldName,
                                 $fieldValue,
                                 MetadataItemInterface $metadataItem = null)
     {
-        $this->responseFieldName = $responseFieldName;
+        $this->exportFieldName = $exportFieldName;
         $this->fieldValue = $fieldValue;
         $this->_metadataItem = $metadataItem;
     }
@@ -68,9 +68,9 @@ class RecordField implements RecordFieldInterface
      *
      * @return string
      */
-    public function getResponseFieldName()
+    public function getExportFieldName()
     {
-        return $this->responseFieldName;
+        return $this->exportFieldName;
     }
 
     /**

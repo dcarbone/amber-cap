@@ -131,7 +131,7 @@ interface MetadataItemInterface extends AmberHatItemInterface
     /**
      * @return array
      */
-    public function getResponseFieldNames();
+    public function getExportFieldNames();
 
     /**
      * @return array
@@ -139,8 +139,8 @@ interface MetadataItemInterface extends AmberHatItemInterface
     public function getFieldChoiceArray();
 
     /**
-     * @param string $responseFieldName
+     * @param string $exportFieldName
      * @return null|string
      */
-    public function getChoiceValueByResponseFieldName($responseFieldName);
+    public function getChoiceValueByExportFieldName($exportFieldName);
 }

@@ -54,7 +54,7 @@ class MetadataItem extends AbstractAmberHatItem implements MetadataItemInterface
     private $_fieldChoiceArray;
 
     /** @var null|array */
-    private $_responseFieldNames;
+    private $_exportFieldNames;
 
     /** @var string|false */
     private $_dateTimeFormatString;
@@ -254,22 +254,22 @@ class MetadataItem extends AbstractAmberHatItem implements MetadataItemInterface
     /**
      * @return array
      */
-    public function getResponseFieldNames()
+    public function getExportFieldNames()
     {
-        if(!isset($this->_responseFieldNames))
+        if(!isset($this->_exportFieldNames))
         {
             switch($this->properties['field_type'])
             {
                 case 'checkbox':
-                    $this->_createCheckboxResponseNameArray();
+                    $this->_createCheckboxExportNameArray();
                     break;
 
                 default:
-                    $this->_responseFieldNames = array($this->properties['field_name']);
+                    $this->_exportFieldNames = array($this->properties['field_name']);
             }
         }
 
-        return $this->_responseFieldNames;
+        return $this->_exportFieldNames;
     }
 
     /**
@@ -304,17 +304,17 @@ class MetadataItem extends AbstractAmberHatItem implements MetadataItemInterface
     }
 
     /**
-     * @param string $responseFieldName
+     * @param string $exportFieldName
      * @return string|null
      */
-    public function getChoiceValueByResponseFieldName($responseFieldName)
+    public function getChoiceValueByExportFieldName($exportFieldName)
     {
         $choices = $this->getFieldChoiceArray();
         if (count($choices) === 0)
             return null;
 
-        $responseNames = $this->getResponseFieldNames();
-        $idx = array_search($responseFieldName, $responseNames, true);
+        $exportNames = $this->getExportFieldNames();
+        $idx = array_search($exportFieldName, $exportNames, true);
         if (-1 === $idx)
             return null;
 
@@ -336,13 +336,13 @@ class MetadataItem extends AbstractAmberHatItem implements MetadataItemInterface
         return $this->properties['field_name'];
     }
 
-    private function _createCheckboxResponseNameArray()
+    private function _createCheckboxExportNameArray()
     {
         $choices = $this->getFieldChoiceArray();
-        $this->_responseFieldNames = array();
+        $this->_exportFieldNames = array();
         foreach($choices as $k=>$v)
         {
-            $this->_responseFieldNames[] = sprintf('%s___%s', $this->properties['field_name'], $k);
+            $this->_exportFieldNames[] = sprintf('%s___%s', $this->properties['field_name'], $k);
         }
     }
 

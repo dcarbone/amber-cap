@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\Metadata;
+<?php namespace DCarbone\AmberHat\ExportFields;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -18,30 +18,26 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-use DCarbone\AmberHat\AbstractAmberHatCollection;
+use DCarbone\AmberHat\AmberHatItemInterface;
 
 /**
- * Class MetadataCollection
- * @package PHPRedcap\MetadataCollection
+ * Interface ExportFieldItemInterface
+ * @package DCarbone\AmberHat\ExportFields
  */
-class MetadataCollection extends AbstractAmberHatCollection
+interface ExportFieldItemInterface extends AmberHatItemInterface
 {
     /**
-     * @param string $xml
-     * @return MetadataCollection
+     * @return string
      */
-    public static function createFromXMLString($xml)
-    {
-        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem', 'field_name');
-    }
+    public function getOriginalFieldName();
 
     /**
-     * @param string $file
-     * @return MetadataCollection
+     * @return string
      */
-    public static function createFromXMLFile($file)
-    {
-        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem', 'field_name');
-    }
+    public function getChoiceValue();
+
+    /**
+     * @return string
+     */
+    public function getExportFieldName();
 }

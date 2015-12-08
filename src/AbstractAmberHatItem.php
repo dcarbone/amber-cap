@@ -32,7 +32,7 @@ abstract class AbstractAmberHatItem implements AmberHatItemInterface
      * @param \SimpleXMLElement $sxe
      * @return AmberHatItemInterface
      */
-    public static function itemFromSXE(\SimpleXMLElement $sxe)
+    public static function createFromSXE(\SimpleXMLElement $sxe)
     {
         $item = new static;
         foreach($sxe->children() as $element)
@@ -47,7 +47,7 @@ abstract class AbstractAmberHatItem implements AmberHatItemInterface
      * @param array $data
      * @return AmberHatItemInterface
      */
-    public static function itemFromArray(array $data)
+    public static function createFromArray(array $data)
     {
         $item = new static;
         foreach($data as $k=>$v)
@@ -139,6 +139,7 @@ abstract class AbstractAmberHatItem implements AmberHatItemInterface
      * @link http://php.net/manual/en/arrayaccess.offsetget.php
      * @param mixed $offset The offset to retrieve.
      * @return mixed Can return all value types.
+     * @throws \Exception
      * @since 5.0.0
      */
     public function offsetGet($offset)
@@ -146,12 +147,7 @@ abstract class AbstractAmberHatItem implements AmberHatItemInterface
         if (isset($this->properties[$offset]) || array_key_exists($offset, $this->properties))
             return $this->properties[$offset];
 
-        throw new \OutOfBoundsException(sprintf(
-                'Redcap Item object "%s" does not have property "%s".',
-                get_class($this),
-                $offset
-            )
-        );
+        throw $this->createUnknownPropertyException($offset);
     }
 
     /**

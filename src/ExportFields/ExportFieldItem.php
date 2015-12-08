@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\Record;
+<?php namespace DCarbone\AmberHat\ExportFields;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -19,39 +19,50 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\AbstractAmberHatItem;
+
 /**
- * Interface RecordFieldInterface
- * @package DCarbone\AmberHat\Record
- *
- * @property string $exportFieldName
- * @property string fieldValue
- * @property bool firstFieldInItem
- * @property bool lastFieldInItem
+ * Class ExportFieldItem
+ * @package DCarbone\AmberHat\ExportFields
  */
-interface RecordFieldInterface
+class ExportFieldItem extends AbstractAmberHatItem implements ExportFieldItemInterface
 {
-    /**
-     * @return string
-     */
-    public function getExportFieldName();
+    /** @var array */
+    protected $properties = array(
+        'original_field_name' => null,
+        'choice_value' => null,
+        'export_field_name' => null,
+    );
 
     /**
      * @return string
      */
-    public function getFieldValue();
+    public function getOriginalFieldName()
+    {
+        return $this->properties['original_field_name'];
+    }
 
     /**
-     * @return \DCarbone\AmberHat\Metadata\MetadataItemInterface|null
+     * @return string
      */
-    public function getMetadataItem();
+    public function getChoiceValue()
+    {
+        return $this->properties['choice_value'];
+    }
 
     /**
-     * @return boolean
+     * @return string
      */
-    public function isFirstFieldInItem();
+    public function getExportFieldName()
+    {
+        return $this->properties['export_field_name'];
+    }
 
     /**
-     * @return boolean
+     * @return string
      */
-    public function isLastFieldInItem();
+    public function __toString()
+    {
+        return (string)$this->properties['export_field_name'];
+    }
 }
