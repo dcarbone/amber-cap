@@ -19,13 +19,13 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use DCarbone\AmberHat\AbstractAmberHatCollection;
+use DCarbone\AmberHat\AbstractItemCollection;
 
 /**
  * Class MetadataCollection
  * @package PHPRedcap\MetadataCollection
  */
-class MetadataCollection extends AbstractAmberHatCollection
+class MetadataCollection extends AbstractItemCollection
 {
     /**
      * @param string $xml

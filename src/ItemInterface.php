@@ -20,10 +20,10 @@
  */
 
 /**
- * Interface AmberHatItemInterface
+ * Interface ItemInterface
  * @package DCarbone\AmberHat
  */
-interface AmberHatItemInterface extends \ArrayAccess, \Iterator, \Serializable, JsonSerializableCompatible
+interface ItemInterface extends \ArrayAccess, \Iterator, \Serializable, JsonSerializableCompatible
 {
     /**
      * @return string

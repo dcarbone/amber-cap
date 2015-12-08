@@ -20,17 +20,17 @@
  */
 
 /**
- * Class AbstractAmberHatItem
+ * Class AbstractItem
  * @package DCarbone\AmberHat
  */
-abstract class AbstractAmberHatItem implements AmberHatItemInterface
+abstract class AbstractItem implements ItemInterface
 {
     /** @var array */
     protected $properties = array();
 
     /**
      * @param \SimpleXMLElement $sxe
-     * @return AmberHatItemInterface
+     * @return ItemInterface
      */
     public static function createFromSXE(\SimpleXMLElement $sxe)
     {
@@ -45,7 +45,7 @@ abstract class AbstractAmberHatItem implements AmberHatItemInterface
 
     /**
      * @param array $data
-     * @return AmberHatItemInterface
+     * @return ItemInterface
      */
     public static function createFromArray(array $data)
     {

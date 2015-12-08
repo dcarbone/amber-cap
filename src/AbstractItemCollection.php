@@ -20,10 +20,10 @@
  */
 
 /**
- * Class AbstractAmberHatCollection
+ * Class AbstractItemCollection
  * @package DCarbone\AmberHat
  */
-abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \Iterator, \Serializable
+abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iterator, \Serializable
 {
     /** @var string */
     protected static $rootNodeName = 'records';
@@ -156,13 +156,13 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
      */
     public function offsetSet($offset, $value)
     {
-        if (is_string($offset) && is_object($value) && $value instanceof AmberHatItemInterface)
+        if (is_string($offset) && is_object($value) && $value instanceof ItemInterface)
         {
             $this->items[$offset] = $value;
             return;
         }
 
-        throw new \DomainException('Redcap collections only accept string keys and object values which implement AmberHatItemInterface');
+        throw new \DomainException('Redcap collections only accept string keys and object values which implement ItemInterface');
     }
 
     /**
@@ -236,12 +236,12 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
      * @param string $xml
      * @param string $itemClass
      * @param string $keyProperty
-     * @return AbstractAmberHatCollection
+     * @return AbstractItemCollection
      * @internal
      */
     protected static function processXMLString($xml, $itemClass, $keyProperty)
     {
-        /** @var \DCarbone\AmberHat\AbstractAmberHatItem $itemClass */
+        /** @var \DCarbone\AmberHat\AbstractItem $itemClass */
 
         $sxe = new \SimpleXMLElement($xml, LIBXML_COMPACT | LIBXML_NOBLANKS);
         if ($sxe instanceof \SimpleXMLElement)
@@ -261,7 +261,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
      * @param string $file
      * @param string $itemClass
      * @param string $keyProperty
-     * @return AbstractAmberHatCollection
+     * @return AbstractItemCollection
      * @internal
      */
     protected static function processXMLFile($file, $itemClass, $keyProperty)
@@ -318,13 +318,13 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
     }
 
     /**
-     * @param AbstractAmberHatCollection $collection
-     * @param AmberHatItemInterface $item
+     * @param AbstractItemCollection $collection
+     * @param ItemInterface $item
      * @param string $keyProperty
      */
     protected static function addItemToCollection(
-        AbstractAmberHatCollection $collection,
-        AmberHatItemInterface $item,
+        AbstractItemCollection $collection,
+        ItemInterface $item,
         $keyProperty)
     {
         $collection[$item[$keyProperty]] = $item;

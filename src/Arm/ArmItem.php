@@ -19,13 +19,13 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use DCarbone\AmberHat\AbstractAmberHatItem;
+use DCarbone\AmberHat\AbstractItem;
 
 /**
  * Class ArmItem
  * @package DCarbone\AmberHat\Arm
  */
-class ArmItem extends AbstractAmberHatItem implements ArmItemInterface
+class ArmItem extends AbstractItem implements ArmItemInterface
 {
     /** @var array */
     protected $properties = array(

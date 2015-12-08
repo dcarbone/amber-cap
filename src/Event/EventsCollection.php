@@ -19,13 +19,13 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use DCarbone\AmberHat\AbstractAmberHatCollection;
+use DCarbone\AmberHat\AbstractItemCollection;
 
 /**
  * Class EventsCollection
  * @package DCarbone\AmberHat\Event
  */
-class EventsCollection extends AbstractAmberHatCollection
+class EventsCollection extends AbstractItemCollection
 {
     /**
      * @param string $xml

@@ -19,13 +19,13 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use DCarbone\AmberHat\AbstractAmberHatItem;
+use DCarbone\AmberHat\AbstractItem;
 
 /**
  * Class ProjectInformation
  * @package DCarbone\AmberHat\Project
  */
-class ProjectInformation extends AbstractAmberHatItem implements ProjectInformationInterface
+class ProjectInformation extends AbstractItem implements ProjectInformationInterface
 {
     const DATETIME_FORMAT = 'Y-m-d H:i:s';
 

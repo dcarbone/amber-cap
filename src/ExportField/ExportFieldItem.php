@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\ExportFields;
+<?php namespace DCarbone\AmberHat\ExportField;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -18,26 +18,51 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-use DCarbone\AmberHat\AmberHatItemInterface;
+
+use DCarbone\AmberHat\AbstractItem;
 
 /**
- * Interface ExportFieldItemInterface
+ * Class ExportFieldItem
  * @package DCarbone\AmberHat\ExportFields
  */
-interface ExportFieldItemInterface extends AmberHatItemInterface
+class ExportFieldItem extends AbstractItem implements ExportFieldItemInterface
 {
-    /**
-     * @return string
-     */
-    public function getOriginalFieldName();
+    /** @var array */
+    protected $properties = array(
+        'original_field_name' => null,
+        'choice_value' => null,
+        'export_field_name' => null,
+    );
 
     /**
      * @return string
      */
-    public function getChoiceValue();
+    public function getOriginalFieldName()
+    {
+        return $this->properties['original_field_name'];
+    }
 
     /**
      * @return string
      */
-    public function getExportFieldName();
+    public function getChoiceValue()
+    {
+        return $this->properties['choice_value'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getExportFieldName()
+    {
+        return $this->properties['export_field_name'];
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return (string)$this->properties['export_field_name'];
+    }
 }

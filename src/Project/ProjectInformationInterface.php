@@ -19,13 +19,13 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use DCarbone\AmberHat\AmberHatItemInterface;
+use DCarbone\AmberHat\ItemInterface;
 
 /**
  * Interface ProjectInformationInterface
  * @package DCarbone\AmberHat\Project
  */
-interface ProjectInformationInterface extends AmberHatItemInterface
+interface ProjectInformationInterface extends ItemInterface
 {
     /**
      * @return int

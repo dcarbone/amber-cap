@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\ExportFields;
+<?php namespace DCarbone\AmberHat\ExportField;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -19,15 +19,15 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use DCarbone\AmberHat\AbstractAmberHatCollection;
-use DCarbone\AmberHat\AmberHatItemInterface;
+use DCarbone\AmberHat\AbstractItemCollection;
+use DCarbone\AmberHat\ItemInterface;
 use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 
 /**
  * Class ExportFieldsCollection
  * @package DCarbone\AmberHat\ExportFields
  */
-class ExportFieldsCollection extends AbstractAmberHatCollection
+class ExportFieldsCollection extends AbstractItemCollection
 {
     /** @var string */
     protected static $rootNodeName = 'fields';
@@ -66,7 +66,7 @@ class ExportFieldsCollection extends AbstractAmberHatCollection
     {
         return self::processXMLString(
             $xml,
-            '\\DCarbone\\AmberHat\\ExportFields\\ExportFieldItem',
+            '\\DCarbone\\AmberHat\\ExportField\\ExportFieldItem',
             'export_field_name');
     }
 
@@ -78,7 +78,7 @@ class ExportFieldsCollection extends AbstractAmberHatCollection
     {
         return self::processXMLFile(
             $file,
-            '\\DCarbone\\AmberHat\\ExportFields\\ExportFieldItem',
+            '\\DCarbone\\AmberHat\\ExportField\\ExportFieldItem',
             'export_field_name');
     }
 
@@ -125,13 +125,13 @@ class ExportFieldsCollection extends AbstractAmberHatCollection
     }
 
     /**
-     * @param AbstractAmberHatCollection $collection
-     * @param AmberHatItemInterface $item
+     * @param AbstractItemCollection $collection
+     * @param ItemInterface $item
      * @param string $keyProperty
      */
     protected static function addItemToCollection(
-        AbstractAmberHatCollection $collection,
-        AmberHatItemInterface $item,
+        AbstractItemCollection $collection,
+        ItemInterface $item,
         $keyProperty)
     {
         if ($collection instanceof self)
