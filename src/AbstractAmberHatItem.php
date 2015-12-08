@@ -66,6 +66,42 @@ abstract class AbstractAmberHatItem implements AmberHatItemInterface
     }
 
     /**
+     * String representation of object
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     * @since 5.1.0
+     */
+    public function serialize()
+    {
+        return serialize($this->properties);
+    }
+
+    /**
+     * Constructs the object
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized The string representation of the object.
+     * @return void
+     * @since 5.1.0
+     */
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        if (is_array($data) && count($data) === count($this->properties))
+        {
+            if (count(array_diff(array_keys($this->properties), array_keys($data))) === 0)
+            {
+                $this->properties = $data;
+                return;
+            }
+        }
+
+        throw new \DomainException(sprintf(
+            '%s::unserialize - Corrupt serialized representation seen.',
+            get_class($this)
+        ));
+    }
+
+    /**
      * Return the current element
      * @link http://php.net/manual/en/iterator.current.php
      * @return mixed Can return any type.

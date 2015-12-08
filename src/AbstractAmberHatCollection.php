@@ -23,7 +23,7 @@
  * Class AbstractAmberHatCollection
  * @package DCarbone\AmberHat
  */
-abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \Iterator
+abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \Iterator, \Serializable
 {
     /** @var string */
     protected static $rootNodeName = 'records';
@@ -31,7 +31,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
     protected static $itemNodeName = 'item';
 
     /** @var array */
-    private $_items = array();
+    protected $items = array();
 
     /**
      * @param string $xml
@@ -65,7 +65,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
      */
     public function current()
     {
-        return current($this->_items);
+        return current($this->items);
     }
 
     /**
@@ -76,7 +76,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
      */
     public function next()
     {
-        next($this->_items);
+        next($this->items);
     }
 
     /**
@@ -87,7 +87,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
      */
     public function key()
     {
-        return key($this->_items);
+        return key($this->items);
     }
 
     /**
@@ -100,7 +100,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
      */
     public function valid()
     {
-        return key($this->_items) !== null;
+        return key($this->items) !== null;
     }
 
     /**
@@ -111,7 +111,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
      */
     public function rewind()
     {
-        reset($this->_items);
+        reset($this->items);
     }
 
     /**
@@ -126,7 +126,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
     public function offsetExists($offset)
     {
         if (is_string($offset))
-            return isset($this->_items[$offset]);
+            return isset($this->items[$offset]);
 
         return false;
     }
@@ -141,7 +141,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
     public function offsetGet($offset)
     {
         if ($this->offsetExists($offset))
-            return $this->_items[$offset];
+            return $this->items[$offset];
 
         throw new \OutOfRangeException('Key "'.$offset.'" does not exist in this MetadataCollection.');
     }
@@ -158,7 +158,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
     {
         if (is_string($offset) && is_object($value) && $value instanceof AmberHatItemInterface)
         {
-            $this->_items[$offset] = $value;
+            $this->items[$offset] = $value;
             return;
         }
 
@@ -180,6 +180,46 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
     }
 
     /**
+     * String representation of object
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     * @since 5.1.0
+     */
+    public function serialize()
+    {
+        return serialize(array(
+            static::$rootNodeName,
+            static::$itemNodeName,
+            $this->items
+        ));
+    }
+
+    /**
+     * Constructs the object
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized The string representation of the object.
+     * @return void
+     * @since 5.1.0
+     */
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        if (count($data) === 3 && is_string($data[0]) && is_string($data[1]) && is_array($data[2]))
+        {
+            static::$rootNodeName = $data[0];
+            static::$itemNodeName = $data[1];
+            $this->items = $data[2];
+        }
+        else
+        {
+            throw new \DomainException(sprintf(
+                '%s::unserialize - Corrupt serialized representation seen.',
+                get_class($this)
+            ));
+        }
+    }
+
+    /**
      * Count elements of an object
      * @link http://php.net/manual/en/countable.count.php
      * @return int The custom count as an integer.
@@ -189,7 +229,7 @@ abstract class AbstractAmberHatCollection implements \ArrayAccess, \Countable, \
      */
     public function count()
     {
-        return count($this->_items);
+        return count($this->items);
     }
 
     /**

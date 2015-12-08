@@ -83,6 +83,48 @@ class ExportFieldsCollection extends AbstractAmberHatCollection
     }
 
     /**
+     * String representation of object
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     * @since 5.1.0
+     */
+    public function serialize()
+    {
+        return serialize(array(
+            static::$rootNodeName,
+            static::$itemNodeName,
+            $this->items,
+            $this->_originalToExportNameMap
+        ));
+    }
+
+    /**
+     * Constructs the object
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized The string representation of the object.
+     * @return void
+     * @since 5.1.0
+     */
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        if (count($data) === 4 && is_string($data[0]) && is_string($data[1]) && is_array($data[2]) && is_array($data[3]))
+        {
+            static::$rootNodeName = $data[0];
+            static::$itemNodeName = $data[1];
+            $this->items = $data[2];
+            $this->_originalToExportNameMap = $data[3];
+        }
+        else
+        {
+            throw new \DomainException(sprintf(
+                '%s::unserialize - Corrupt serialized representation seen.',
+                get_class($this)
+            ));
+        }
+    }
+
+    /**
      * @param AbstractAmberHatCollection $collection
      * @param AmberHatItemInterface $item
      * @param string $keyProperty
@@ -96,13 +138,17 @@ class ExportFieldsCollection extends AbstractAmberHatCollection
         {
             $collection[$item['export_field_name']] = $item;
 
-            if (!isset($collection->_originalToExportNameMap[$item['original_field_name']]))
-                $collection->_originalToExportNameMap[$item['original_field_name']] = array();
+            if ($item['choice_value'] === '')
+            {
+                $collection->_originalToExportNameMap[$item['original_field_name']] = $item['export_field_name'];
+            }
+            else
+            {
+                if (!isset($collection->_originalToExportNameMap[$item['original_field_name']]))
+                    $collection->_originalToExportNameMap[$item['original_field_name']] = array();
 
-            $collection->_originalToExportNameMap[$item['original_field_name']][] = array(
-                'choice_value' => $item['choice_value'],
-                'export_field_name' => $item['export_field_name']
-            );
+                $collection->_originalToExportNameMap[$item['original_field_name']][$item['choice_value']] = $item['export_field_name'];
+            }
         }
         else
         {
