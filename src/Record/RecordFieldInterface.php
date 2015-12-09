@@ -23,7 +23,7 @@
  * Interface RecordFieldInterface
  * @package DCarbone\AmberHat\Record
  *
- * @property string $exportFieldName
+ * @property string exportFieldName
  * @property string fieldValue
  * @property bool firstFieldInItem
  * @property bool lastFieldInItem
