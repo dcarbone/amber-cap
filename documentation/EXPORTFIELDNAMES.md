@@ -13,7 +13,7 @@ each object in the collection implementing
 
 Ex:
 ```php
-/** @var \DCarbone\AmberHat\ExportFieldName\ExportFieldNameItemInterface $armItem **/
+/** @var \DCarbone\AmberHat\ExportFieldName\ExportFieldNameItemInterface $exportNameItem **/
 echo '<pre>';
 foreach($client->getExportFieldNames() as $exportNameItem)
 {
