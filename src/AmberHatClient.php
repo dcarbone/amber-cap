@@ -36,6 +36,9 @@ class AmberHatClient
     /** @var string */
     private $_token;
 
+    /** @var array */
+    private $_files = array();
+
     /** @var string */
     private $_tempDirectory;
     /** @var bool */
@@ -58,13 +61,28 @@ class AmberHatClient
         $this->_tempDirectory = rtrim($tempDirectory, "/\\");
         $this->_saveTempFiles = (bool)$saveTempFiles;
     }
+
+    /**
+     * Cleanup any temp files if we are not supposed to keep them.
+     */
+    public function __destruct()
+    {
+        if (false === $this->_saveTempFiles)
+        {
+            foreach($this->_files as $file)
+            {
+                @unlink($file);
+            }
+        }
+    }
+
     /**
      * @param array $armNumbers
      * @return \DCarbone\AmberHat\Arm\ArmsCollection
      */
     public function getArms(array $armNumbers = array())
     {
-        return $this->_createCollectionAndCleanupDataFile(
+        return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Arm\\ArmsCollection',
             $this->_executeRequest('arm', array('arms' => $armNumbers), false)
         );
@@ -76,7 +94,7 @@ class AmberHatClient
      */
     public function getEvents(array $armNumbers = array())
     {
-        return $this->_createCollectionAndCleanupDataFile(
+        return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Event\\EventsCollection',
             $this->_executeRequest('event', array('arms' => $armNumbers), false)
         );
@@ -89,19 +107,19 @@ class AmberHatClient
      */
     public function getMetadata(array $forms = array(), array $fields = array())
     {
-        return $this->_createCollectionAndCleanupDataFile(
+        return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Metadata\\MetadataCollection',
             $this->_executeRequest('metadata', array('forms' => $forms, 'fields' => $fields), false)
         );
     }
 
     /**
-     * @return \DCarbone\AmberHat\ExportField\ExportFieldsCollection
+     * @return \DCarbone\AmberHat\ExportFieldName\ExportFieldNamesCollection
      */
-    public function getExportFields()
+    public function getExportFieldNames()
     {
-        return $this->_createCollectionAndCleanupDataFile(
-            '\\DCarbone\\AmberHat\\ExportField\\ExportFieldsCollection',
+        return $this->_createCollection(
+            '\\DCarbone\\AmberHat\\ExportFieldName\\ExportFieldNamesCollection',
             $this->_executeRequest('exportFieldNames')
         );
     }
@@ -109,7 +127,7 @@ class AmberHatClient
     /**
      * @return \DCarbone\AmberHat\Project\ProjectInformationInterface
      */
-    public function getProjectInfo()
+    public function getProjectInformation()
     {
         return ProjectInformation::createWithXMLString(
             $this->_executeRequest('project', array(), true)
@@ -117,25 +135,23 @@ class AmberHatClient
     }
 
     /**
-     * @param array $forms
+     * @param string $formName
      * @param array $fields
      * @param array $events
      * @param MetadataCollection|null $metadataCollection
      * @return RecordParser
      */
-    public function getRecords(array $forms = array(),
+    public function getRecords($formName,
                                array $fields = array(),
                                array $events = array(),
                                MetadataCollection $metadataCollection = null)
     {
         $filename = $this->_executeRequest(
             'record',
-            array('forms' => $forms, 'events' => $events, 'fields' => $fields),
+            array('forms' => $formName, 'events' => $events, 'fields' => $fields),
             false);
 
-        $parser = RecordParser::createWithXMLFile($filename, $metadataCollection);
-
-        $this->_deleteTemporaryFile($filename);
+        $parser = RecordParser::createWithXMLFile($filename, $formName, $metadataCollection);
 
         return $parser;
     }
@@ -145,7 +161,7 @@ class AmberHatClient
      * @param string $filename
      * @return \DCarbone\AmberHat\AbstractItemCollection
      */
-    private function _createCollectionAndCleanupDataFile($collectionClass, $filename)
+    private function _createCollection($collectionClass, $filename)
     {
         /** @var \DCarbone\AmberHat\AbstractItemCollection $collectionClass */
 
@@ -154,23 +170,7 @@ class AmberHatClient
         else
             $collection = $collectionClass::createFromXMLFile($filename);
 
-        $this->_deleteTemporaryFile($filename);
-
         return $collection;
-    }
-
-    /**
-     * @param string $filename
-     */
-    private function _deleteTemporaryFile($filename)
-    {
-        if (false === $this->_saveTempFiles && false === @unlink($filename))
-        {
-            throw new \RuntimeException(sprintf(
-                'Unable to delete data file "%s"!  Please check permissions before continuing.',
-                $filename
-            ));
-        }
     }
 
     /**
@@ -243,6 +243,7 @@ class AmberHatClient
 
                     if (($error = curl_error($ch)) === '')
                     {
+                        $this->_files[] = $filename;
                         fclose($fh);
                         curl_close($ch);
                         return $filename;

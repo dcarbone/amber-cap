@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\AbstractItemCollection;
+use DCarbone\AmberHat\ItemInterface;
 
 /**
  * Class MetadataCollection
@@ -33,7 +34,7 @@ class MetadataCollection extends AbstractItemCollection
      */
     public static function createFromXMLString($xml)
     {
-        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem', 'field_name');
+        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem');
     }
 
     /**
@@ -42,6 +43,29 @@ class MetadataCollection extends AbstractItemCollection
      */
     public static function createFromXMLFile($file)
     {
-        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem', 'field_name');
+        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem');
+    }
+
+    /**
+     * @param AbstractItemCollection $collection
+     * @param ItemInterface $item
+     * @param string $keyProperty
+     */
+    protected static function addItemToCollection(
+        AbstractItemCollection $collection,
+        ItemInterface $item,
+        $keyProperty)
+    {
+        if ($collection instanceof self)
+        {
+            $key = sprintf('%s:%s', $item['form_name'], $item['field_name']);
+            $collection[$key] = $item;
+        }
+        else
+        {
+            throw new \BadMethodCallException(
+                'Cannot utilize overloaded static method "addItemToCollection" on on class "MetadataCollection" with different collection class.'
+            );
+        }
     }
 }

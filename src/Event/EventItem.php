@@ -90,6 +90,6 @@ class EventItem extends AbstractItem implements EventItemInterface
      */
     public function __toString()
     {
-        return $this->properties['event_name'];
+        return $this->properties['unique_event_name'];
     }
 }

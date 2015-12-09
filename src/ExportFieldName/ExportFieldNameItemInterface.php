@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\ExportField;
+<?php namespace DCarbone\AmberHat\ExportFieldName;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -21,10 +21,10 @@
 use DCarbone\AmberHat\ItemInterface;
 
 /**
- * Interface ExportFieldItemInterface
- * @package DCarbone\AmberHat\ExportFields
+ * Interface ExportFieldNameItemInterface
+ * @package DCarbone\AmberHat\ExportFieldName
  */
-interface ExportFieldItemInterface extends ItemInterface
+interface ExportFieldNameItemInterface extends ItemInterface
 {
     /**
      * @return string

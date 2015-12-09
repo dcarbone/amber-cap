@@ -34,6 +34,9 @@ class RecordParser
     private $_metadataCollection;
 
     /** @var string */
+    private $_formName;
+
+    /** @var string */
     private $_saxExportFieldName = null;
 
     /** @var bool */
@@ -41,26 +44,30 @@ class RecordParser
 
     /**
      * @param \XMLReader|null $xmlReader
+     * @param string $formName
      * @param MetadataCollection|null $metadataCollection
      */
-    protected function __construct(\XMLReader $xmlReader, MetadataCollection $metadataCollection = null)
+    protected function __construct(\XMLReader $xmlReader, $formName, MetadataCollection $metadataCollection = null)
     {
         $this->_xmlReader = $xmlReader;
+        $this->_formName = $formName;
         $this->_metadataCollection = $metadataCollection;
     }
 
     /**
      * @param string $file
+     * @param string $formName
      * @param MetadataCollection|null $metadataCollection
      * @return RecordParser
      */
-    public static function createWithXMLFile($file, MetadataCollection $metadataCollection = null)
+    public static function createWithXMLFile($file, $formName, MetadataCollection $metadataCollection = null)
     {
         $xmlReader = new \XMLReader();
         $xmlReader->open($file);
 
         return new RecordParser(
             $xmlReader,
+            $formName,
             $metadataCollection
         );
     }
@@ -146,13 +153,15 @@ class RecordParser
         if (!isset($this->_metadataCollection))
             return null;
 
-        if (isset($this->_metadataCollection[$exportFieldName]))
-            return $this->_metadataCollection[$exportFieldName];
+        $key = sprintf('%s:%s', $this->_formName, $exportFieldName);
 
-        $exportFieldName = preg_replace('/(___[a-zA-Z0-9]+$)/', '', $exportFieldName);
+        if (isset($this->_metadataCollection[$key]))
+            return $this->_metadataCollection[$key];
 
-        if (isset($this->_metadataCollection[$exportFieldName]))
-            return $this->_metadataCollection[$exportFieldName];
+        $key = sprintf('%s:%s', $this->_formName, preg_replace('/(___[a-zA-Z0-9]+$)/', '', $exportFieldName));
+
+        if (isset($this->_metadataCollection[$key]))
+            return $this->_metadataCollection[$key];
 
         return null;
     }

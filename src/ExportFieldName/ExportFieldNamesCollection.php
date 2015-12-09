@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\ExportField;
+<?php namespace DCarbone\AmberHat\ExportFieldName;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -24,10 +24,10 @@ use DCarbone\AmberHat\ItemInterface;
 use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 
 /**
- * Class ExportFieldsCollection
- * @package DCarbone\AmberHat\ExportFields
+ * Class ExportFieldNamesCollection
+ * @package DCarbone\AmberHat\ExportFieldName
  */
-class ExportFieldsCollection extends AbstractItemCollection
+class ExportFieldNamesCollection extends AbstractItemCollection
 {
     /** @var string */
     protected static $rootNodeName = 'fields';
@@ -60,25 +60,25 @@ class ExportFieldsCollection extends AbstractItemCollection
 
     /**
      * @param string $xml
-     * @return ExportFieldsCollection
+     * @return ExportFieldNamesCollection
      */
     public static function createFromXMLString($xml)
     {
         return self::processXMLString(
             $xml,
-            '\\DCarbone\\AmberHat\\ExportField\\ExportFieldItem',
+            '\\DCarbone\\AmberHat\\ExportFieldName\\ExportFieldNameItem',
             'export_field_name');
     }
 
     /**
      * @param string $file
-     * @return ExportFieldsCollection
+     * @return ExportFieldNamesCollection
      */
     public static function createFromXMLFile($file)
     {
         return self::processXMLFile(
             $file,
-            '\\DCarbone\\AmberHat\\ExportField\\ExportFieldItem',
+            '\\DCarbone\\AmberHat\\ExportFieldName\\ExportFieldNameItem',
             'export_field_name');
     }
 
@@ -153,7 +153,7 @@ class ExportFieldsCollection extends AbstractItemCollection
         else
         {
             throw new \BadMethodCallException(
-                'Cannot utilize overloaded static method "addItemToCollection" on on class "ExportFieldsCollection" with different collection class.'
+                'Cannot utilize overloaded static method "addItemToCollection" on on class "ExportFieldNamesCollection" with different collection class.'
             );
         }
     }

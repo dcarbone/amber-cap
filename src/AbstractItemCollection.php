@@ -239,7 +239,7 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
      * @return AbstractItemCollection
      * @internal
      */
-    protected static function processXMLString($xml, $itemClass, $keyProperty)
+    protected static function processXMLString($xml, $itemClass, $keyProperty = null)
     {
         /** @var \DCarbone\AmberHat\AbstractItem $itemClass */
 
@@ -264,7 +264,7 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
      * @return AbstractItemCollection
      * @internal
      */
-    protected static function processXMLFile($file, $itemClass, $keyProperty)
+    protected static function processXMLFile($file, $itemClass, $keyProperty = null)
     {
         $xmlReader = new \XMLReader();
         $xmlReader->open($file);
@@ -327,6 +327,9 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
         ItemInterface $item,
         $keyProperty)
     {
-        $collection[$item[$keyProperty]] = $item;
+        if (null === $keyProperty)
+            $collection[] = $item;
+        else
+            $collection[$item[$keyProperty]] = $item;
     }
 }

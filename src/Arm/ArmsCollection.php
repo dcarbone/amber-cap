@@ -33,7 +33,7 @@ class ArmsCollection extends AbstractItemCollection
      */
     public static function createFromXMLString($xml)
     {
-        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Arm\\ArmItem', 'name');
+        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Arm\\ArmItem', 'arm_num');
     }
 
     /**
@@ -42,6 +42,6 @@ class ArmsCollection extends AbstractItemCollection
      */
     public static function createFromXMLFile($file)
     {
-        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Arm\\ArmItem', 'name');
+        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Arm\\ArmItem', 'arm_num');
     }
 }

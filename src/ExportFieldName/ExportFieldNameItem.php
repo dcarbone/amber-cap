@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\ExportField;
+<?php namespace DCarbone\AmberHat\ExportFieldName;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -22,10 +22,10 @@
 use DCarbone\AmberHat\AbstractItem;
 
 /**
- * Class ExportFieldItem
- * @package DCarbone\AmberHat\ExportFields
+ * Class ExportFieldNameItem
+ * @package DCarbone\AmberHat\ExportFieldName
  */
-class ExportFieldItem extends AbstractItem implements ExportFieldItemInterface
+class ExportFieldNameItem extends AbstractItem implements ExportFieldNameItemInterface
 {
     /** @var array */
     protected $properties = array(
