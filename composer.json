@@ -2,6 +2,7 @@
     "name": "dcarbone/amber-hat",
     "type": "library",
     "description": "Lib designed to help PHP apps consume from REDCap's API",
+    "homepage": "https://github.com/dcarbone/amber-hat",
     "license": "GPL-2.0",
     "authors": [
         {
