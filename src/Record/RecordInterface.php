@@ -1,5 +1,7 @@
 <?php namespace DCarbone\AmberHat\Record;
 
+use DCarbone\AmberHat\JsonSerializableCompatible;
+
 /*
     AmberHat: A REDCap Client library written in PHP
     Copyright (C) 2015  Daniel Paul Carbone (daniel.p.carbone@gmail.com)
@@ -19,21 +21,14 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use DCarbone\AmberHat\JsonSerializableCompatible;
-
 /**
- * Interface RecordFieldInterface
+ * Interface RecordInterface
  * @package DCarbone\AmberHat\Record
  *
  * @property string recordID
  * @property string formName
- * @property string|null redcapEventName
- * @property string fieldName
- * @property string fieldValue
- * @property bool $firstFieldInRecord
- * @property bool $lastFieldInRecord
  */
-interface RecordFieldInterface extends \Serializable, JsonSerializableCompatible
+interface RecordInterface extends \ArrayAccess, \Iterator, \Countable, \Serializable, JsonSerializableCompatible
 {
     /**
      * @return string
@@ -44,36 +39,6 @@ interface RecordFieldInterface extends \Serializable, JsonSerializableCompatible
      * @return string
      */
     public function getFormName();
-
-    /**
-     * @return string
-     */
-    public function getFieldName();
-
-    /**
-     * @return string
-     */
-    public function getFieldValue();
-
-    /**
-     * @return string
-     */
-    public function getRedcapEventName();
-
-    /**
-     * @return \DCarbone\AmberHat\Metadata\MetadataItemInterface|null
-     */
-    public function getMetadataItem();
-
-    /**
-     * @return boolean
-     */
-    public function isFirstFieldInRecord();
-
-    /**
-     * @return boolean
-     */
-    public function isLastFieldInRecord();
 
     /**
      * @return string

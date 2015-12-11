@@ -28,49 +28,71 @@ use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 class RecordField implements RecordFieldInterface
 {
     /** @var string */
-    public $exportFieldName;
+    public $recordID;
+    /** @var string */
+    public $formName;
+    /** @var string|null */
+    public $redcapEventName;
+
+    /** @var string */
+    public $fieldName;
     /** @var string */
     public $fieldValue;
 
     /** @var bool */
-    public $firstFieldInItem = false;
+    public $firstFieldInRecord = false;
     /** @var bool */
-    public $lastFieldInItem = false;
+    public $lastFieldInRecord = false;
 
     /** @var MetadataItemInterface|null */
     private $_metadataItem;
 
     /**
      * Constructor
-     * @param string $exportFieldName
+     * @param $recordID
+     * @param $formName
+     * @param string $fieldName
      * @param string $fieldValue
+     * @param null $redcapEventName
      * @param MetadataItemInterface|null $metadataItem
      */
-    public function __construct($exportFieldName,
+    public function __construct($recordID,
+                                $formName,
+                                $fieldName,
                                 $fieldValue,
+                                $redcapEventName = null,
                                 MetadataItemInterface $metadataItem = null)
     {
-        $this->exportFieldName = $exportFieldName;
+        $this->recordID = $recordID;
+        $this->formName = $formName;
+        $this->fieldName = $fieldName;
         $this->fieldValue = $fieldValue;
+        $this->redcapEventName = $redcapEventName;
         $this->_metadataItem = $metadataItem;
     }
 
     /**
-     * @return MetadataItemInterface|null
+     * @return string
      */
-    public function getMetadataItem()
+    public function getRecordID()
     {
-        return $this->_metadataItem;
+        return $this->recordID;
     }
 
     /**
-     * Name of field in Record
-     *
      * @return string
      */
-    public function getExportFieldName()
+    public function getFormName()
     {
-        return $this->exportFieldName;
+        return $this->formName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFieldName()
+    {
+        return $this->fieldName;
     }
 
     /**
@@ -82,19 +104,110 @@ class RecordField implements RecordFieldInterface
     }
 
     /**
-     * @return boolean
+     * @return null|string
      */
-    public function isFirstFieldInItem()
+    public function getRedcapEventName()
     {
-        return $this->firstFieldInItem;
+        return $this->redcapEventName;
     }
 
     /**
-     * @return boolean
+     * @return MetadataItemInterface|null
      */
-    public function isLastFieldInItem()
+    public function getMetadataItem()
     {
-        return $this->lastFieldInItem;
+        return $this->_metadataItem;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFirstFieldInRecord()
+    {
+        return $this->firstFieldInRecord;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLastFieldInRecord()
+    {
+        return $this->lastFieldInRecord;
+    }
+
+    /**
+     * String representation of object
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     * @since 5.1.0
+     */
+    public function serialize()
+    {
+        return serialize(array(
+            $this->recordID,
+            $this->formName,
+            $this->fieldName,
+            $this->fieldValue,
+            $this->firstFieldInRecord,
+            $this->lastFieldInRecord,
+            $this->_metadataItem,
+            $this->redcapEventName,
+        ));
+    }
+
+    /**
+     * Constructs the object
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized The string representation of the object.
+     * @return void
+     * @since 5.1.0
+     */
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+        if (count($data) === 8
+            && is_string($data[0])
+            && is_string($data[1])
+            && is_string($data[2])
+            && (null === $data[3] || is_scalar($data[3]))
+            && is_bool($data[4])
+            && is_bool($data[5])
+            && (null === $data[6] || $data[6] instanceof MetadataItemInterface)
+            && (null === $data[7] || is_string($data[7])))
+        {
+            $this->recordID = $data[0];
+            $this->formName = $data[1];
+            $this->fieldName = $data[2];
+            $this->fieldValue = $data[3];
+            $this->firstFieldInRecord = $data[4];
+            $this->lastFieldInRecord = $data[5];
+            $this->_metadataItem = $data[6];
+            $this->redcapEventName = $data[7];
+        }
+        else
+        {
+            throw new \DomainException(sprintf(
+                '%s - Unstable serialized object representation seen.',
+                get_class($this)
+            ));
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return array(
+            'recordID' => $this->recordID,
+            'formName' => $this->formName,
+            'fieldName' => $this->fieldName,
+            'fieldValue' => $this->fieldValue,
+            'firstFieldInRecord' => $this->firstFieldInRecord,
+            'lastFieldInRecord' => $this->lastFieldInRecord,
+            'redcapEventName' => $this->redcapEventName,
+            'metadataItem' => (isset($this->_metadataItem) ? $this->_metadataItem->jsonSerialize() : null)
+        );
     }
 
     /**

@@ -84,7 +84,7 @@ class AmberHatClient
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Arm\\ArmsCollection',
-            $this->_executeRequest('arm', array('arms' => $armNumbers), false)
+            $this->_executeRequest('arm', 'flat', array('arms' => $armNumbers), false)
         );
     }
 
@@ -96,7 +96,7 @@ class AmberHatClient
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Event\\EventsCollection',
-            $this->_executeRequest('event', array('arms' => $armNumbers), false)
+            $this->_executeRequest('event', 'flat', array('arms' => $armNumbers), false)
         );
     }
 
@@ -109,7 +109,7 @@ class AmberHatClient
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Metadata\\MetadataCollection',
-            $this->_executeRequest('metadata', array('forms' => $forms, 'fields' => $fields), false)
+            $this->_executeRequest('metadata', 'flat', array('forms' => $forms, 'fields' => $fields), false)
         );
     }
 
@@ -120,7 +120,7 @@ class AmberHatClient
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\ExportFieldName\\ExportFieldNamesCollection',
-            $this->_executeRequest('exportFieldNames')
+            $this->_executeRequest('exportFieldNames', 'flat')
         );
     }
 
@@ -130,7 +130,7 @@ class AmberHatClient
     public function getProjectInformation()
     {
         return ProjectInformation::createWithXMLString(
-            $this->_executeRequest('project', array(), true)
+            $this->_executeRequest('project', 'flat', array(), true)
         );
     }
 
@@ -148,8 +148,8 @@ class AmberHatClient
     {
         $filename = $this->_executeRequest(
             'record',
-            array('forms' => $formName, 'events' => $events, 'fields' => $fields),
-            false);
+            'eav',
+            array('forms' => $formName, 'events' => $events, 'fields' => $fields));
 
         $parser = RecordParser::createWithXMLFile($filename, $formName, $metadataCollection);
 
@@ -177,13 +177,14 @@ class AmberHatClient
      * TODO: Make this less messy
      *
      * @param string $content
+     * @param $type
      * @param array $additionalParams
      * @param bool $returnData
      * @return string
      */
-    private function _executeRequest($content, array $additionalParams = array(), $returnData = false)
+    private function _executeRequest($content, $type, array $additionalParams = array(), $returnData = false)
     {
-        $postFieldString = $this->_buildPostFields($content, $additionalParams);
+        $postFieldString = $this->_buildPostFields($content, $type, $additionalParams);
 
         if ($returnData)
         {
@@ -273,10 +274,11 @@ class AmberHatClient
 
     /**
      * @param string $content
+     * @param string $type
      * @param array $others
      * @return string
      */
-    private function _buildPostFields($content, array $others = array())
+    private function _buildPostFields($content, $type, array $others = array())
     {
         return http_build_query(
             array_filter(
@@ -286,7 +288,7 @@ class AmberHatClient
                         'content' => $content,
                         'token' => $this->_token,
                         'format' => 'xml',
-                        'type' => 'flat',
+                        'type' => $type,
                     )
                 ),
                 function($value) {

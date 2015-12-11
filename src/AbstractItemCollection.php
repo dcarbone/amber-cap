@@ -125,10 +125,7 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
      */
     public function offsetExists($offset)
     {
-        if (is_string($offset))
-            return isset($this->items[$offset]);
-
-        return false;
+        return isset($this->items[$offset]);
     }
 
     /**
@@ -140,7 +137,7 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
      */
     public function offsetGet($offset)
     {
-        if ($this->offsetExists($offset))
+        if (isset($this->items[$offset]))
             return $this->items[$offset];
 
         throw new \OutOfRangeException('Key "'.$offset.'" does not exist in this MetadataCollection.');
