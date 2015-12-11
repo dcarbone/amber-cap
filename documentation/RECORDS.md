@@ -8,7 +8,7 @@ dozens of fields on any given form, and the sheer size of the response can be su
 
 To that end, this lib was developed against a survey containing ~26,000 records at the time of this
 documentation to be as fast and lightweight as possible.  To THAT end, the main underlying technology
-used is [XMLReader](http://php.net/manual/en/class.xmlreader.php).
+used is [XMLParser](http://php.net/manual/en/book.xml.php).
 
 ## Methods and Return Objects
 
@@ -90,7 +90,7 @@ foreach($formNames as $formName)
     // At this point, the client will go out and attempt to fetch form data
     // for the form you specified.  The response will be cached in the Temp directory
     // you specified during client creation.  It will then be looped through using
-    // \XMLReader.
+    // XML Parser.
     $recordParser = $client->getRecords($formName, array(), array(), $metadata);
     
     // Default is to read and return each field
