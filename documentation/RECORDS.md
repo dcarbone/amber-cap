@@ -34,13 +34,31 @@ in your REDCap project.
 *NOTE:* At the moment, it is only possible to retrieve a single form's records at a time. Multi-form record
 retrieval is being looked at for future releases.
 
-The response object is a [RecordParser](../src/Record/RecordParser.php).  Once this object
-is received, you may fetch one field at a time using the ` fetchField() ` method.  This method
-returns objects that implement [RecordFieldInterface](../src/Record/RecordFieldInterface.php).
+The response object is a [RecordParser](../src/Record/RecordParser.php). Once this object
+is received, you are able to retrieve data using the `read` method.
 
-## Basic Workflow
+## RecordParser Read Modes
 
-A typical workflow should look like this:
+The parser supports 2 different operating modes, definable with the method `setMode`
+on [RecordParser](../src/Record/RecordParser.php):
+
+1. (Default) Field return mode
+2. Record return mode
+
+These are represented as class constants within the [RecordParser](../src/Record/RecordParser.php) class:
+
+1. `MODE_READ_FIELD`
+2. `MODE_READ_RECORD`
+
+In Field return mode, the parser will return an object PER FIELD in the response, irrespective of parent
+record.  The object will be an instance of [RecordFieldInterface](../src/Record/RecordFieldInterface.php).
+
+In Record return mode, the parser will only return an object once it has looped through and found all fields
+that belong to a single Record ID.  The object will be an instance of
+[RecordInterface](../src/Record/RecordInterface.php), and it will contain child objects of type
+[RecordFieldInterface](../src/Record/RecordFieldInterface.php).
+
+## Sample Workflow
 
 ```php
 use DCarbone\AmberHat\AmberHatClient;
@@ -75,16 +93,20 @@ foreach($formNames as $formName)
     // \XMLReader.
     $recordParser = $client->getRecords($formName, array(), array(), $metadata);
     
-    while ($field = $recordParser->fetchField())
+    // Default is to read and return each field
+    while ($field = $recordParser->read())
     {
         echo <<<STRING
-Export Field Name: {$field->exportFieldName}
+Record ID: {$field->recordID}
+Form Name: {$field->formName}
+REDCap Event Name: {$field->redcapEventName}
+Field Name: {$field->fieldName}
 Field Value: {$field->fieldValue}
 STRING;
-        echo "\nFirst Field In Item: ";
-        echo $field->firstFieldInItem ? 'TRUE' : 'FALSE';
-        echo "\nLast Field In Item: ";
-        echo $field->lastFieldInItem ? 'TRUE' : 'FALSE';
+        echo "\nFirst Field In Record: ";
+        echo $field->firstFieldInRecord ? 'TRUE' : 'FALSE';
+        echo "\nLast Field In Record: ";
+        echo $field->lastFieldInRecord ? 'TRUE' : 'FALSE';
         echo "\nHas Metadata Item: ";
         echo $field->getMetadataItem() !== null ? 'TRUE' : 'FALSE';
         echo sprintf("\n%s\n", str_repeat('-', 50));
