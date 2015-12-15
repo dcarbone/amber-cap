@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\Project;
+<?php namespace DCarbone\AmberHat\Information;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -23,7 +23,7 @@ use DCarbone\AmberHat\ItemInterface;
 
 /**
  * Interface ProjectInformationInterface
- * @package DCarbone\AmberHat\Project
+ * @package DCarbone\AmberHat\Information
  */
 interface ProjectInformationInterface extends ItemInterface
 {

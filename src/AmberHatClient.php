@@ -19,15 +19,17 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\Information\ProjectInformation;
 use DCarbone\AmberHat\Metadata\MetadataCollection;
-use DCarbone\AmberHat\Project\ProjectInformation;
 use DCarbone\AmberHat\Record\RecordParser;
+use DCarbone\CurlPlus\CurlPlusClient;
+use DCarbone\CurlPlus\CurlPlusClientContainerInterface;
 
 /**
  * Class AmberHatClient
  * @package DCarbone\AmberHat
  */
-class AmberHatClient
+class AmberHatClient implements CurlPlusClientContainerInterface
 {
     const MAX_MEMORY_FILESIZE = 10000000;
 
@@ -43,6 +45,9 @@ class AmberHatClient
     private $_tempDirectory;
     /** @var bool */
     private $_saveTempFiles;
+
+    /** @var CurlPlusClient */
+    private $_curlClient;
 
     /**
      * Constructor
@@ -60,6 +65,8 @@ class AmberHatClient
         $this->_token = $token;
         $this->_tempDirectory = rtrim($tempDirectory, "/\\");
         $this->_saveTempFiles = (bool)$saveTempFiles;
+
+        $this->_curlClient = new CurlPlusClient();
     }
 
     /**
@@ -125,7 +132,7 @@ class AmberHatClient
     }
 
     /**
-     * @return \DCarbone\AmberHat\Project\ProjectInformationInterface
+     * @return \DCarbone\AmberHat\Information\ProjectInformationInterface
      */
     public function getProjectInformation()
     {
@@ -154,6 +161,14 @@ class AmberHatClient
         $parser = RecordParser::createWithXMLFile($filename, $formName, $metadataCollection);
 
         return $parser;
+    }
+
+    /**
+     * @return CurlPlusClient
+     */
+    public function getCurlClient()
+    {
+        return $this->_curlClient;
     }
 
     /**
@@ -186,39 +201,26 @@ class AmberHatClient
     {
         $postFieldString = $this->_buildPostFields($content, $type, $additionalParams);
 
+        $this->_curlClient->initialize($this->_redcapApiEndpoint, false);
+        $this->_curlClient
+            ->setCurlOpt(CURLOPT_POST, true)
+            ->setCurlOpt(CURLOPT_FOLLOWLOCATION, true)
+            ->setCurlOpt(CURLOPT_POSTFIELDS, $postFieldString);
+
         if ($returnData)
         {
-            $ch = curl_init($this->_redcapApiEndpoint);
+            $this->_curlClient->setCurlOpt(CURLOPT_RETURNTRANSFER, true);
 
-            if ($ch)
-            {
-                curl_setopt_array($ch, array(
-                    CURLOPT_POST => true,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_POSTFIELDS => $postFieldString,
-                    CURLOPT_SSL_VERIFYPEER => false
-                ));
+            $response = $this->_curlClient->execute(false);
 
-                $data = curl_exec($ch);
+            if (($error = $response->getError()) === '')
+                return $response->getResponseBody();
 
-                if (($error = curl_error($ch)) === '')
-                {
-                    curl_close($ch);
-                    return $data;
-                }
-
-                if (gettype($ch) === 'resource')
-                    curl_close($ch);
-
-                throw new \RuntimeException(sprintf(
-                    'Error received when querying for "%s" content.  Error: "%s"',
-                    $content,
-                    $error
-                ));
-            }
-
-            throw new \RuntimeException('Unable to initialize CURL resource.');
+            throw new \RuntimeException(sprintf(
+                'Error received when querying for "%s" content.  Error: "%s"',
+                $content,
+                $error
+            ));
         }
         else
         {
@@ -228,41 +230,21 @@ class AmberHatClient
 
             if ($fh)
             {
-                $ch = curl_init($this->_redcapApiEndpoint);
+                $this->_curlClient->setCurlOpt(CURLOPT_FILE, $fh);
 
-                if ($ch)
+                $response = $this->_curlClient->execute(false);
+
+                if (($error = $response->getError()) === '')
                 {
-                    curl_setopt_array($ch, array(
-                        CURLOPT_POST => true,
-                        CURLOPT_FOLLOWLOCATION => true,
-                        CURLOPT_FILE => $fh,
-                        CURLOPT_POSTFIELDS => $postFieldString,
-                        CURLOPT_SSL_VERIFYPEER => false
-                    ));
-
-                    curl_exec($ch);
-
-                    if (($error = curl_error($ch)) === '')
-                    {
-                        $this->_files[] = $filename;
-                        fclose($fh);
-                        curl_close($ch);
-                        return $filename;
-                    }
-
+                    $this->_files[] = $filename;
                     fclose($fh);
-
-                    if (gettype($ch) === 'resource')
-                        curl_close($ch);
-
-                    throw new \RuntimeException(sprintf(
-                        'Error received when querying for "%s" content.  Error: "%s"',
-                        $content,
-                        $error
-                    ));
+                    return $response->getOutputFile();
                 }
-
-                throw new \RuntimeException('Unable to initialize CURL resource.');
+                throw new \RuntimeException(sprintf(
+                    'Error received when querying for "%s" content.  Error: "%s"',
+                    $content,
+                    $error
+                ));
             }
 
             throw new \RuntimeException(sprintf(

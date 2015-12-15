@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\Project;
+<?php namespace DCarbone\AmberHat\Information;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -23,7 +23,7 @@ use DCarbone\AmberHat\AbstractItem;
 
 /**
  * Class ProjectInformation
- * @package DCarbone\AmberHat\Project
+ * @package DCarbone\AmberHat\Information
  */
 class ProjectInformation extends AbstractItem implements ProjectInformationInterface
 {
@@ -60,7 +60,7 @@ class ProjectInformation extends AbstractItem implements ProjectInformationInter
 
     /**
      * @param $xml
-     * @return \DCarbone\AmberHat\Project\ProjectInformationInterface
+     * @return \DCarbone\AmberHat\Information\ProjectInformationInterface
      */
     public static function createWithXMLString($xml)
     {

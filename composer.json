@@ -18,11 +18,20 @@
     "require": {
         "php": ">=5.3.3",
         "ext-libxml": "*",
-        "ext-curl": "*"
+        "lib-libxml": "*",
+        "ext-curl": "*",
+        "lib-curl": "*",
+        "ext-mbstring": "*",
+        "ext-pcre": "*",
+        "lib-pcre": "*",
+        "ext-date": "*",
+        "ext-SPL": "*",
+        "dcarbone/curl-plus": "2.0.*"
     },
 
     "suggest": {
-        "ext-openssl": "For that SSL goodness."
+        "ext-openssl": "For that SSL goodness.",
+        "lib-openssl": ""
     },
 
     "autoload": {
