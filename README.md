@@ -7,7 +7,7 @@ This lib requires the use of [Composer](https://getcomposer.org/).
 
 ```json
 "require": {
-    "dcarbone/amber-hat": "0.2.*"
+    "dcarbone/amber-hat": "0.4.*"
 }
 ```
 
