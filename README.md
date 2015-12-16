@@ -41,6 +41,7 @@ is the list so far:
 4. [ExportFieldNames](documentation/EXPORTFIELDNAMES.md)
 5. [ProjectInformation](documentation/PROJECTINFORMATION.md)
 6. [Records](documentation/RECORDS.md)
+7. [Record Field File](documentation/FILE.md)
 
 ### Basic Export Data Object Structure
 
