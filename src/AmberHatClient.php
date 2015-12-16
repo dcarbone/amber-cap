@@ -21,7 +21,11 @@
 
 use DCarbone\AmberHat\Information\ProjectInformation;
 use DCarbone\AmberHat\Metadata\MetadataCollection;
+use DCarbone\AmberHat\Record\RecordField;
+use DCarbone\AmberHat\Record\RecordFieldFile;
+use DCarbone\AmberHat\Record\RecordFieldInterface;
 use DCarbone\AmberHat\Record\RecordParser;
+use DCarbone\AmberHat\Utilities\FileUtility;
 use DCarbone\CurlPlus\CurlPlusClient;
 use DCarbone\CurlPlus\CurlPlusClientContainerInterface;
 
@@ -91,7 +95,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Arm\\ArmsCollection',
-            $this->_executeRequest('arm', 'flat', array('arms' => $armNumbers), false)
+            (string)$this->_executeRequest('arm', array('format' => 'xml', 'arms' => $armNumbers))
         );
     }
 
@@ -103,7 +107,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Event\\EventsCollection',
-            $this->_executeRequest('event', 'flat', array('arms' => $armNumbers), false)
+            (string)$this->_executeRequest('event', array('format' => 'xml', 'arms' => $armNumbers))
         );
     }
 
@@ -116,7 +120,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\Metadata\\MetadataCollection',
-            $this->_executeRequest('metadata', 'flat', array('forms' => $forms, 'fields' => $fields), false)
+            (string)$this->_executeRequest('metadata', array('format' => 'xml', 'forms' => $forms, 'fields' => $fields))
         );
     }
 
@@ -127,7 +131,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     {
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\ExportFieldName\\ExportFieldNamesCollection',
-            $this->_executeRequest('exportFieldNames', 'flat')
+            (string)$this->_executeRequest('exportFieldNames', array('format' => 'xml'))
         );
     }
 
@@ -137,7 +141,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     public function getProjectInformation()
     {
         return ProjectInformation::createWithXMLString(
-            $this->_executeRequest('project', 'flat', array(), true)
+            (string)$this->_executeRequest('project', array('format' => 'xml'), false)
         );
     }
 
@@ -153,14 +157,103 @@ class AmberHatClient implements CurlPlusClientContainerInterface
                                array $events = array(),
                                MetadataCollection $metadataCollection = null)
     {
-        $filename = $this->_executeRequest(
+        $filename = (string)$this->_executeRequest(
             'record',
-            'eav',
-            array('forms' => $formName, 'events' => $events, 'fields' => $fields));
+            array('format' => 'xml', 'type' => 'eav', 'forms' => $formName, 'events' => $events, 'fields' => $fields)
+        );
 
         $parser = RecordParser::createWithXMLFile($filename, $formName, $metadataCollection);
 
         return $parser;
+    }
+
+    /**
+     * @param RecordFieldInterface $recordField
+     * @param null $outputDir
+     * @return RecordFieldFile|string
+     */
+    public function getFile(RecordFieldInterface $recordField, $outputDir = null)
+    {
+        if (null === $outputDir)
+            $outputDir = $this->_tempDirectory;
+
+        if (!is_dir($outputDir))
+        {
+            throw new \InvalidArgumentException(sprintf(
+                '%s::getFile - "%s" does not appear to be a directory.',
+                get_class($this),
+                $outputDir
+            ));
+        }
+
+        if (!is_writable($outputDir))
+        {
+            throw new \RuntimeException(sprintf(
+                '%s::getFile - "%s" is not writable by this process, please check permissions.',
+                get_class($this),
+                $outputDir
+            ));
+        }
+
+        $tmpFilename = $this->_executeRequest(
+            'file',
+            array(
+                'action' => 'export',
+                'record' => $recordField->recordID,
+                'field' => $recordField->fieldName,
+                'event' => $recordField->redcapEventName,
+            ),
+            true,
+            sprintf(
+                '%s/%s',
+                $this->_tempDirectory,
+                sha1(sprintf('%s%s%s', $recordField->formName, $recordField->fieldName, rand(0, 100)))
+            ),
+            true,
+            false
+        );
+
+        list($headers, $byteOffset) = FileUtility::extractHeadersFromFile($tmpFilename);
+
+        if (null === $headers)
+        {
+            trigger_error(
+                sprintf(
+                    '%s::getFile - Unable to parse headers from response, this could be cause either by a malformed response or improper CURLOPT specification.  Form Name: %s, Field Name: %s, Record ID: %s',
+                    get_class($this),
+                    $recordField->formName,
+                    $recordField->fieldName,
+                    $recordField->recordID
+                ),
+                E_USER_WARNING
+            );
+
+            return $tmpFilename;
+        }
+
+        $headers = end($headers);
+        if (isset($headers['Content-Type']))
+        {
+            preg_match('{name=["\']([^"\']+)["\']}S', $headers['Content-Type'], $filename);
+
+            if (count($filename) === 2)
+            {
+                $file = FileUtility::removeHeadersAndMoveFile($tmpFilename, $byteOffset, $outputDir, $filename[1]);
+
+                return new RecordFieldFile(
+                    $file,
+                    trim(substr($headers['Content-Type'], 0, strlen($headers['Content-Type']) - strlen($filename[0])), " ;")
+                );
+            }
+        }
+
+        throw new \RuntimeException(sprintf(
+            '%s::getFile - Unable to determine filename from response headers.  Form: %s, Field Name: %s, Record ID: %s',
+            get_class($this),
+            $recordField->formName,
+            $recordField->fieldName,
+            $recordField->recordID
+        ));
     }
 
     /**
@@ -189,60 +282,64 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     }
 
     /**
-     * TODO: Make this less messy
-     *
      * @param string $content
-     * @param $type
-     * @param array $additionalParams
-     * @param bool $returnData
-     * @return string
+     * @param array $parameters
+     * @param bool $outputToFile
+     * @param string $filename
+     * @param bool $includeHeadersInResponse
+     * @param bool $removeFileOnShutdown
+     * @return \DCarbone\CurlPlus\Response\CurlPlusResponseInterface
+     * @internal param $type
      */
-    private function _executeRequest($content, $type, array $additionalParams = array(), $returnData = false)
+    private function _executeRequest($content,
+                                     array $parameters,
+                                     $outputToFile = true,
+                                     $filename = null,
+                                     $includeHeadersInResponse = false,
+                                     $removeFileOnShutdown = true)
     {
-        $postFieldString = $this->_buildPostFields($content, $type, $additionalParams);
+        $postFieldString = $this->_buildPostFields($content, $parameters);
 
         $this->_curlClient->initialize($this->_redcapApiEndpoint, false);
         $this->_curlClient
             ->setCurlOpt(CURLOPT_POST, true)
             ->setCurlOpt(CURLOPT_FOLLOWLOCATION, true)
-            ->setCurlOpt(CURLOPT_POSTFIELDS, $postFieldString);
+            ->setCurlOpt(CURLOPT_POSTFIELDS, $postFieldString)
+            ->removeCurlOpt(CURLOPT_FILE);
 
-        if ($returnData)
+        if ($outputToFile)
         {
-            $this->_curlClient->setCurlOpt(CURLOPT_RETURNTRANSFER, true);
+            if (null === $filename)
+                $filename = sprintf('%s/%s.xml', $this->_tempDirectory, sha1($postFieldString));
 
-            $response = $this->_curlClient->execute(false);
-
-            if (($error = $response->getError()) === '')
-                return $response->getResponseBody();
-
-            throw new \RuntimeException(sprintf(
-                'Error received when querying for "%s" content.  Error: "%s"',
-                $content,
-                $error
-            ));
-        }
-        else
-        {
-            $filename = sprintf('%s/%s.xml', $this->_tempDirectory, sha1($postFieldString));
-
-            $fh = fopen($filename, 'w+');
+            $fh = fopen($filename, 'w+b');
 
             if ($fh)
             {
-                $this->_curlClient->setCurlOpt(CURLOPT_FILE, $fh);
+                $this->_curlClient
+                    ->setCurlOpt(CURLOPT_RETURNTRANSFER, false)
+                    ->setCurlOpt(CURLOPT_FILE, $fh);
+
+                if ($includeHeadersInResponse)
+                    $this->_curlClient->setCurlOpt(CURLOPT_HEADER, true);
+                else
+                    $this->_curlClient->setCurlOpt(CURLOPT_HEADER, false);
 
                 $response = $this->_curlClient->execute(false);
 
-                if (($error = $response->getError()) === '')
+                if (($error = $response->getError()) === '' && $response->getHttpCode() === 200)
                 {
-                    $this->_files[] = $filename;
+                    if ($removeFileOnShutdown)
+                        $this->_files[] = $filename;
+
                     fclose($fh);
-                    return $response->getOutputFile();
+                    return $response;
                 }
+
                 throw new \RuntimeException(sprintf(
-                    'Error received when querying for "%s" content.  Error: "%s"',
+                    'Error received when querying for "%s" content. Code: %s,  Error: "%s"',
                     $content,
+                    $response->getHttpCode(),
                     $error
                 ));
             }
@@ -252,25 +349,38 @@ class AmberHatClient implements CurlPlusClientContainerInterface
                 $filename
             ));
         }
+        else
+        {
+            $this->_curlClient->setCurlOpt(CURLOPT_RETURNTRANSFER, true);
+
+            $response = $this->_curlClient->execute(false);
+
+            if (($error = $response->getError()) === '' && $response->getHttpCode() === 200)
+                return $response;
+
+            throw new \RuntimeException(sprintf(
+                'Error received when querying for "%s" content. HTTP Code: %s, Error: "%s"',
+                $content,
+                $response->getHttpCode(),
+                $error
+            ));
+        }
     }
 
     /**
      * @param string $content
-     * @param string $type
-     * @param array $others
+     * @param array $parameters
      * @return string
      */
-    private function _buildPostFields($content, $type, array $others = array())
+    private function _buildPostFields($content, array $parameters = array())
     {
         return http_build_query(
             array_filter(
                 array_merge(
-                    $others,
+                    $parameters,
                     array(
                         'content' => $content,
-                        'token' => $this->_token,
-                        'format' => 'xml',
-                        'type' => $type,
+                        'token' => $this->_token
                     )
                 ),
                 function($value) {
