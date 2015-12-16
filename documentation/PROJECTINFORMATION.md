@@ -7,7 +7,7 @@ $projectInfo = $client->getProjectInformation();
 ```
 
 The response comes in the form of an object implementing
-[ProjectInformationInterface](../src/Project/ProjectInformationInterface.php).
+[ProjectInformationInterface](../src/Information/ProjectInformationInterface.php).
 
 Ex:
 ```php
