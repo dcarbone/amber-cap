@@ -15,7 +15,7 @@ abstract class FileUtility
         if (!file_exists($tmpFilename))
         {
             throw new \InvalidArgumentException(sprintf(
-                '%s::extractHeadersFromFileHandle - Specified non existent file "%s".',
+                '%s::extractHeadersFromFile - Specified non existent file "%s".',
                 get_called_class(),
                 $tmpFilename
             ));
