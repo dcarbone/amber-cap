@@ -8,7 +8,7 @@ $users = $client->getUsers();
 ## Response Classes
 
 Response will be of type [UsersCollection](../src/User/UsersCollection.php) containing
-1+ [UserItem](../src/User/UserItem.php) objects.
+1+ [UserItemInterface](../src/User/UserItemInterface.php) objects.
 
 ## Example Usage
 
