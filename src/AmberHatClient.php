@@ -205,7 +205,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     /**
      * @param RecordFieldInterface $recordField
      * @param null $outputDir
-     * @return RecordFieldFile|string
+     * @return \DCarbone\AmberHat\Record\RecordFieldFileInterface|string
      */
     public function getFile(RecordFieldInterface $recordField, $outputDir = null)
     {
@@ -216,6 +216,15 @@ class AmberHatClient implements CurlPlusClientContainerInterface
         {
             throw new \InvalidArgumentException(sprintf(
                 '%s::getFile - "%s" does not appear to be a directory.',
+                get_class($this),
+                $outputDir
+            ));
+        }
+
+        if (!is_readable($outputDir))
+        {
+            throw new \RuntimeException(sprintf(
+                '%s::getFile - "%s" is not readable by this process, please check permissions.',
                 get_class($this),
                 $outputDir
             ));
@@ -362,6 +371,11 @@ class AmberHatClient implements CurlPlusClientContainerInterface
             ->setCurlOpt(CURLOPT_POSTFIELDS, $postFieldString)
             ->removeCurlOpt(CURLOPT_FILE);
 
+        if ($includeHeadersInResponse)
+            $this->_curlClient->setCurlOpt(CURLOPT_HEADER, true);
+        else
+            $this->_curlClient->setCurlOpt(CURLOPT_HEADER, false);
+
         if ($outputToFile)
         {
             if (null === $filename)
@@ -374,11 +388,6 @@ class AmberHatClient implements CurlPlusClientContainerInterface
                 $this->_curlClient
                     ->setCurlOpt(CURLOPT_RETURNTRANSFER, false)
                     ->setCurlOpt(CURLOPT_FILE, $fh);
-
-                if ($includeHeadersInResponse)
-                    $this->_curlClient->setCurlOpt(CURLOPT_HEADER, true);
-                else
-                    $this->_curlClient->setCurlOpt(CURLOPT_HEADER, false);
 
                 $response = $this->_curlClient->execute(false);
 
