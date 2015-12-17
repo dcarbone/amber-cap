@@ -27,6 +27,18 @@ use DCarbone\AmberHat\AbstractItem;
  */
 class UserItem extends AbstractItem implements UserItemInterface
 {
+    const DATA_EXPORT_NO_ACCESS = 0;
+    const DATA_EXPORT_DE_IDENTIFIED = 1;
+    const DATA_EXPORT_FULL_DATA_SET = 2;
+
+    const FORM_RIGHTS_NO_ACCESS = 0;
+    const FORM_RIGHTS_READ_ONLY = 1;
+    const FORM_RIGHTS_VIEW_RECORDS_RESPONSES = 2;
+    const FORM_RIGHTS_EDIT_RESPONSES = 3;
+
+    const NO_ACCESS = 0;
+    const HAS_ACCESS = 1;
+
     /** @var array */
     protected $properties = array(
         'username' => null,
@@ -144,11 +156,11 @@ class UserItem extends AbstractItem implements UserItemInterface
     }
 
     /**
-     * @return bool
+     * @return int
      */
-    public function canExportData()
+    public function getDataExportPermissionLevel()
     {
-        return $this->properties['data_export'] == 1;
+        return (int)$this->properties['data_export'];
     }
 
     /**
@@ -321,12 +333,24 @@ class UserItem extends AbstractItem implements UserItemInterface
 
     /**
      * @param string $form
-     * @return bool
+     * @return bool|null
      */
     public function hasAccessToForm($form)
     {
         if (isset($this->properties['forms'][$form]))
-            return $this->properties['forms'][$form] == 1;
+            return $this->properties['forms'][$form] > 0;
+
+        return null;
+    }
+
+    /**
+     * @param string $form
+     * @return int|null
+     */
+    public function getPermissionLevelForForm($form)
+    {
+        if (isset($this->properties['forms'][$form]))
+            return (int)$this->properties['forms'][$form];
 
         return null;
     }

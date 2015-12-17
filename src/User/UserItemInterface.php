@@ -78,9 +78,9 @@ interface UserItemInterface extends ItemInterface
     public function canModifyDataAccessGroups();
 
     /**
-     * @return bool
+     * @return int
      */
-    public function canExportData();
+    public function getDataExportPermissionLevel();
 
     /**
      * @return bool
@@ -192,4 +192,10 @@ interface UserItemInterface extends ItemInterface
      * @return bool
      */
     public function hasAccessToForm($form);
+
+    /**
+     * @param string $form
+     * @return int|null
+     */
+    public function getPermissionLevelForForm($form);
 }
