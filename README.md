@@ -32,22 +32,26 @@ $client = new AmberHatClient(
 
 ## Available Data Export methods:
 
-This lib does not yet fully support all possible export options from REDCap, but here
-is the list so far:
-
-1. [Arms](documentation/ARMS.md)
-2. [Events](documentation/EVENTS.md)
-3. [Metadata](documentation/METADATA.md)
-4. [ExportFieldNames](documentation/EXPORTFIELDNAMES.md)
-5. [ProjectInformation](documentation/PROJECTINFORMATION.md)
-6. [Records](documentation/RECORDS.md)
-7. [Record Field File](documentation/FILE.md)
+- [Arms](documentation/ARMS.md)
+- [Events](documentation/EVENTS.md)
+- [Metadata](documentation/METADATA.md)
+- [Export Field Names](documentation/EXPORTFIELDNAMES.md)
+- [Project Information](documentation/PROJECTINFORMATION.md)
+- [Form Events](documentation/FORMEVENTS.md)
+- [Users](documentation/USER.md)
+- [Instruments (forms)](documentation/INSTRUMENT.md)
+- [Records](documentation/RECORDS.md)
+- [Record Field File](documentation/FILE.md)
+- [Version](documentation/VERSION.md)
 
 ### Basic Export Data Object Structure
 
-With the exception of [Records](documentation/RECORDS.md) and
-[ProjectInformation](documentation/PROJECTINFORMATION.md), all export methods return a collection
-class which extends [AbstractItemCollection](src/AbstractItemCollection.php).  This collection class
+With the exception of
+[Records](documentation/RECORDS.md),
+[Project Information](documentation/PROJECTINFORMATION.md),
+and [Record Field File](documentation/FILE.md),
+all export methods return a collection class which extends
+[AbstractItemCollection](src/AbstractItemCollection.php).  This collection class
 implements the following interfaces:
 
 - [ArrayAccess](http://php.net/manual/en/class.arrayaccess.php)

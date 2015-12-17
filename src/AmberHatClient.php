@@ -21,7 +21,6 @@
 
 use DCarbone\AmberHat\Information\ProjectInformation;
 use DCarbone\AmberHat\Metadata\MetadataCollection;
-use DCarbone\AmberHat\Record\RecordField;
 use DCarbone\AmberHat\Record\RecordFieldFile;
 use DCarbone\AmberHat\Record\RecordFieldInterface;
 use DCarbone\AmberHat\Record\RecordParser;
@@ -52,6 +51,9 @@ class AmberHatClient implements CurlPlusClientContainerInterface
 
     /** @var CurlPlusClient */
     private $_curlClient;
+
+    /** @var string */
+    private $_redcapVersion = null;
 
     /**
      * Constructor
@@ -132,6 +134,39 @@ class AmberHatClient implements CurlPlusClientContainerInterface
         return $this->_createCollection(
             '\\DCarbone\\AmberHat\\ExportFieldName\\ExportFieldNamesCollection',
             (string)$this->_executeRequest('exportFieldNames', array('format' => 'xml'))
+        );
+    }
+
+    /**
+     * @return \DCarbone\AmberHat\Instrument\InstrumentsCollection
+     */
+    public function getInstruments()
+    {
+        return $this->_createCollection(
+            '\\DCarbone\\AmberHat\\Instrument\\InstrumentsCollection',
+            (string)$this->_executeRequest('instrument', array('format' => 'xml'))
+        );
+    }
+
+    /**
+     * @return \DCarbone\AmberHat\FormEventMapping\FormEventMappingsCollection
+     */
+    public function getFormEventMappings()
+    {
+        return $this->_createCollection(
+            '\\DCarbone\\AmberHat\\FormEventMapping\\FormEventMappingsCollection',
+            (string)$this->_executeRequest('formEventMapping', array('format' => 'xml'))
+        );
+    }
+
+    /**
+     * @return \DCarbone\AmberHat\User\UsersCollection
+     */
+    public function getUsers()
+    {
+        return $this->_createCollection(
+            '\\DCarbone\\AmberHat\\User\\UsersCollection',
+            (string)$this->_executeRequest('user', array('format' => 'xml'))
         );
     }
 
@@ -257,11 +292,31 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     }
 
     /**
+     * @return string
+     */
+    public function getREDCapVersion()
+    {
+        if (null === $this->_redcapVersion)
+            $this->_redcapVersion = (string)$this->_executeRequest('version', array('format' => 'xml'), false);
+
+        return $this->_redcapVersion;
+    }
+
+    /**
      * @return CurlPlusClient
      */
     public function getCurlClient()
     {
         return $this->_curlClient;
+    }
+
+    /**
+     * @internal
+     * @return array
+     */
+    public function _getCachedFiles()
+    {
+        return $this->_files;
     }
 
     /**

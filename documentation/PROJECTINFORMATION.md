@@ -1,15 +1,15 @@
 # Project Information Data Export
 
-Once you have built your client, you may request Project Information data using the following method:
-
+## Method
 ```php
 $projectInfo = $client->getProjectInformation();
 ```
 
-The response comes in the form of an object implementing
+Response will be of type 
 [ProjectInformationInterface](../src/Information/ProjectInformationInterface.php).
 
-Ex:
+## Example Usage
+
 ```php
 echo '<pre>';
 echo <<<STRING

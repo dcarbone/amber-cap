@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\Record;
+<?php namespace DCarbone\AmberHat\Instrument;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -19,44 +19,29 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\AbstractItemCollection;
+
 /**
- * Interface RecordFieldFileInterface
- * @package DCarbone\AmberHat\File
- *
- * @property string basename
- * @property string filePath
- * @property string fileType
- * @property int fileSize
+ * Class InstrumentsCollection
+ * @package DCarbone\AmberHat\Instrument
  */
-interface RecordFieldFileInterface
+class InstrumentsCollection extends AbstractItemCollection
 {
     /**
-     * @return string
+     * @param string $xml
+     * @return InstrumentsCollection
      */
-    public function getBasename();
+    public static function createFromXMLString($xml)
+    {
+        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Instrument\\InstrumentItem', 'instrument_name');
+    }
 
     /**
-     * @return string
+     * @param string $file
+     * @return InstrumentsCollection
      */
-    public function getFilePath();
-
-    /**
-     * @return string
-     */
-    public function getFileType();
-
-    /**
-     * @return int
-     */
-    public function getFileSize();
-
-    /**
-     * @return string
-     */
-    public function getFileContents();
-
-    /**
-     * @return string
-     */
-    public function __toString();
+    public static function createFromXMLFile($file)
+    {
+        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Instrument\\InstrumentItem', 'instrument_name');
+    }
 }

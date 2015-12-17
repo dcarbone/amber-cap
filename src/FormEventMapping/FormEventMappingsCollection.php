@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\Metadata;
+<?php namespace DCarbone\AmberHat\FormEventMapping;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -23,27 +23,27 @@ use DCarbone\AmberHat\AbstractItemCollection;
 use DCarbone\AmberHat\ItemInterface;
 
 /**
- * Class MetadataCollection
- * @package PHPRedcap\MetadataCollection
+ * Class FormEventMappingsCollection
+ * @package DCarbone\AmberHat\FormEventMapping
  */
-class MetadataCollection extends AbstractItemCollection
+class FormEventMappingsCollection extends AbstractItemCollection
 {
     /**
      * @param string $xml
-     * @return MetadataCollection
+     * @return FormEventMappingsCollection
      */
     public static function createFromXMLString($xml)
     {
-        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem');
+        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\FormEventMapping\\FormEventMappingItem');
     }
 
     /**
      * @param string $file
-     * @return MetadataCollection
+     * @return FormEventMappingsCollection
      */
     public static function createFromXMLFile($file)
     {
-        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem');
+        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\FormEventMapping\\FormEventMappingItem');
     }
 
     /**
@@ -51,18 +51,18 @@ class MetadataCollection extends AbstractItemCollection
      * @param ItemInterface $item
      * @param string $keyProperty
      */
-    protected static function addItemToCollection(AbstractItemCollection $collection,
-                                                  ItemInterface $item,
-                                                  $keyProperty)
+    public static function addItemToCollection(AbstractItemCollection $collection,
+                                               ItemInterface $item,
+                                               $keyProperty)
     {
         if ($collection instanceof self)
         {
-            $collection[sprintf('%s:%s', $item['form_name'], $item['field_name'])] = $item;
+            $collection[sprintf('%s:%s', $item['form'], $item['unique_event_name'])] = $item;
         }
         else
         {
             throw new \BadMethodCallException(
-                'Cannot utilize overloaded static method "addItemToCollection" on on class "MetadataCollection" with different collection class.'
+                'Cannot utilize overloaded static method "addItemToCollection" on on class "FormEventMappingsCollection" with different collection class.'
             );
         }
     }

@@ -54,6 +54,6 @@ class ArmItem extends AbstractItem implements ArmItemInterface
      */
     public function __toString()
     {
-        return $this->properties['name'];
+        return (string)$this->properties['name'];
     }
 }

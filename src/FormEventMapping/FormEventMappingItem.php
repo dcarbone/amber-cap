@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\Record;
+<?php namespace DCarbone\AmberHat\FormEventMapping;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -19,44 +19,50 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\AbstractItem;
+
 /**
- * Interface RecordFieldFileInterface
- * @package DCarbone\AmberHat\File
- *
- * @property string basename
- * @property string filePath
- * @property string fileType
- * @property int fileSize
+ * Class FormEventMappingItem
+ * @package DCarbone\AmberHat\FormEventMapping
  */
-interface RecordFieldFileInterface
+class FormEventMappingItem extends AbstractItem implements FormEventMappingItemInterface
 {
-    /**
-     * @return string
-     */
-    public function getBasename();
+    /** @var array */
+    protected $properties = array(
+        'arm_num' => null,
+        'unique_event_name' => null,
+        'form' => null
+    );
 
     /**
      * @return string
      */
-    public function getFilePath();
+    public function getArmNum()
+    {
+        return $this->properties['arm_num'];
+    }
 
     /**
      * @return string
      */
-    public function getFileType();
-
-    /**
-     * @return int
-     */
-    public function getFileSize();
-
-    /**
-     * @return string
-     */
-    public function getFileContents();
+    public function getUniqueEventName()
+    {
+        return $this->properties['unique_event_name'];
+    }
 
     /**
      * @return string
      */
-    public function __toString();
+    public function getForm()
+    {
+        return $this->properties['form'];
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return sprintf('%s:%s', $this->properties['form'], $this->properties['unique_event_name']);
+    }
 }

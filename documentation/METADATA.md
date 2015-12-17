@@ -1,18 +1,20 @@
 # Metadata Data Export
 
-Once you have built your client, you may request Metadata data for a project as such:
-
+## Method
 ```php
-$metadataCollection = $client->getMetadata();
+$metadata = $client->getMetadata();
 ```
 
 You may optionally pass in an array of form names and/or an array of field names if you only wish to 
 receive metadata about those specific ones.
 
-The response comes in the form of a [MetadataCollection](../src/Metadata/MetadataCollection.php) object, with
-each object in the collection implementing [MetadataItemInterface](../src/Metadata/MetadataItemInterface.php).
+## Response
 
-Ex:
+Response will be of type [MetadataCollection](../src/Metadata/MetadataCollection.php), containing
+1+ [MetadataItemInterface](../src/Metadata/MetadataItemInterface.php) objects.
+
+## Example Usage
+
 ```php
 echo '<pre>';
 /** @var \DCarbone\AmberHat\Metadata\MetadataItemInterface $metadataItem **/

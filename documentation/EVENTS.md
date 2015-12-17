@@ -1,22 +1,22 @@
 # Event Data Export
 
-Once you have built your client, you may request Event data for a project that uses the
-event concept using the following method:
-
+## Method
 ```php
-$eventsCollection = $client->getEvents();
+$events = $client->getEvents();
 ```
 
 You may optionally pass in an array of known Event Numbers if you only wish to receive data
 about a few specific ones.
 
-The response comes in the form of a [EventsCollection](../src/Event/EventsCollection.php) object, with
-each object in the collection implementing [EventItemInterface](../src/Event/EventItemInterface.php).
+## Response
 
-Ex:
+Response will be of type [EventsCollection](../src/Event/EventsCollection.php), containing
+0+ [EventItemInterface](../src/Event/EventItemInterface.php) objects.
+
+## Example Usage
+
 ```php
 echo '<pre>';
-/** @var \DCarbone\AmberHat\Event\EventItemInterface $eventItem **/
 foreach($client->getEvents() as $eventItem)
 {
     echo <<<STRING

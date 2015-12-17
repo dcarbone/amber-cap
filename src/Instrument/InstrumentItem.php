@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\Record;
+<?php namespace DCarbone\AmberHat\Instrument;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -19,44 +19,41 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\AbstractItem;
+
 /**
- * Interface RecordFieldFileInterface
- * @package DCarbone\AmberHat\File
- *
- * @property string basename
- * @property string filePath
- * @property string fileType
- * @property int fileSize
+ * Class InstrumentItem
+ * @package DCarbone\AmberHat\Instrument
  */
-interface RecordFieldFileInterface
+class InstrumentItem extends AbstractItem implements InstrumentItemInterface
 {
-    /**
-     * @return string
-     */
-    public function getBasename();
+    /** @var array */
+    protected $properties = array(
+        'instrument_name' => null,
+        'instrument_label' => null
+    );
 
     /**
      * @return string
      */
-    public function getFilePath();
+    public function getInstrumentName()
+    {
+        return $this->properties['instrument_name'];
+    }
 
     /**
      * @return string
      */
-    public function getFileType();
-
-    /**
-     * @return int
-     */
-    public function getFileSize();
-
-    /**
-     * @return string
-     */
-    public function getFileContents();
+    public function getInstrumentLabel()
+    {
+        return $this->properties['instrument_label'];
+    }
 
     /**
      * @return string
      */
-    public function __toString();
+    public function __toString()
+    {
+        return (string)$this->properties['instrument_name'];
+    }
 }

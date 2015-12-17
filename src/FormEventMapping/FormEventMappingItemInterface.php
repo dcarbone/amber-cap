@@ -1,4 +1,4 @@
-<?php namespace DCarbone\AmberHat\Record;
+<?php namespace DCarbone\AmberHat\FormEventMapping;
 
 /*
     AmberHat: A REDCap Client library written in PHP
@@ -19,44 +19,26 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\ItemInterface;
+
 /**
- * Interface RecordFieldFileInterface
- * @package DCarbone\AmberHat\File
- *
- * @property string basename
- * @property string filePath
- * @property string fileType
- * @property int fileSize
+ * Interface FormEventMappingItemInterface
+ * @package DCarbone\AmberHat\FormEventMapping
  */
-interface RecordFieldFileInterface
+interface FormEventMappingItemInterface extends ItemInterface
 {
     /**
      * @return string
      */
-    public function getBasename();
+    public function getArmNum();
 
     /**
      * @return string
      */
-    public function getFilePath();
+    public function getUniqueEventName();
 
     /**
      * @return string
      */
-    public function getFileType();
-
-    /**
-     * @return int
-     */
-    public function getFileSize();
-
-    /**
-     * @return string
-     */
-    public function getFileContents();
-
-    /**
-     * @return string
-     */
-    public function __toString();
+    public function getForm();
 }

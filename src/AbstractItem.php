@@ -38,7 +38,22 @@ abstract class AbstractItem implements ItemInterface
         foreach($sxe->children() as $element)
         {
             /** @var \SimpleXMLElement $element */
-            $item[$element->getName()] = (string)$element;
+            /** @var \SimpleXMLElement[] $children */
+            $children = $element->children();
+            if (count($children) > 0)
+            {
+                $values = array();
+                foreach($children as $child)
+                {
+                    $values[$child->getName()] = (string)$child;
+                }
+
+                $item[$element->getName()] = $values;
+            }
+            else
+            {
+                $item[$element->getName()] = (string)$element;
+            }
         }
         return $item;
     }

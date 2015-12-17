@@ -1,19 +1,19 @@
 # Export Field Names Data Export
 
-Once you have built your client, you may request Export Field Names data for a project as such:
-
+## Method
 ```php
 $exportFieldNames = $client->getExportFieldNames();
 ```
 
-The response comes in the form of a
-[ExportFieldNamesCollection](../src/ExportFieldName/ExportFieldNamesCollection.php) object, with
-each object in the collection implementing
-[ExportFieldNameItemInterface](../src/ExportFieldName/ExportFieldNameItemInterface.php).
+## Response
 
-Ex:
+Response will be of type
+[ExportFieldNamesCollection](../src/ExportFieldName/ExportFieldNamesCollection.php), containing
+1+ [ExportFieldNameItemInterface](../src/ExportFieldName/ExportFieldNameItemInterface.php) objects.
+
+## Example Usage
+
 ```php
-/** @var \DCarbone\AmberHat\ExportFieldName\ExportFieldNameItemInterface $exportNameItem **/
 echo '<pre>';
 foreach($client->getExportFieldNames() as $exportNameItem)
 {
