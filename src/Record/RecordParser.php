@@ -61,7 +61,7 @@ class RecordParser
     /** @var string */
     private $_currentElementName = null;
 
-    /** @var null|RecordField */
+    /** @var null|RecordFieldInterface */
     private $_previousField = null;
 
     /** @var int */
@@ -204,7 +204,7 @@ class RecordParser
                 case self::POS_IN_FIELD:
                     continue 2;
 
-                // Typically speaking, items will be on a single line.
+                // Typically speaking, fields will be on a single line.
                 // However, in the event of multi-line notes content or the like,
                 // we do NOT want to create  an item per-line.
                 case self::POS_END_OF_FIELD:
@@ -216,11 +216,15 @@ class RecordParser
                         $this->_redcapEventName,
                         $this->_getMetadataItem($this->_fieldName)
                     );
+
+                    // This...probably is not useful.
                     $this->_recordID = null;
                     $this->_redcapEventName = null;
                     $this->_fieldName = null;
                     $this->_fieldValue = null;
 
+                    // We will be 1 loop behind until we've
+                    // reached the end of the document.
                     if (null === $this->_previousField)
                     {
                         $field->firstFieldInRecord = true;
@@ -236,28 +240,27 @@ class RecordParser
                         return $returnField;
                     }
 
-                    if ($this->_previousField->recordID === $field->recordID)
+                    // We're still collecting fields for this record...
+                    if ($field->recordID === $this->_previousField->recordID
+                        && $field->redcapEventName === $this->_previousField->redcapEventName)
                     {
                         $record[] = $this->_previousField;
                         $this->_previousField = $field;
                         $field = null;
+
                         continue 2;
                     }
 
-                    if ($this->_previousField->recordID !== $field->recordID)
-                    {
-                        $this->_previousField->lastFieldInRecord = true;
-                        $field->firstFieldInRecord = true;
+                    // If we've reached here, we are at a new record.
+                    $this->_previousField->lastFieldInRecord = true;
+                    $field->firstFieldInRecord = true;
 
-                        $record->recordID = $this->_previousField->recordID;
-                        $record->formName = $this->_formName;
-                        $record[] = $this->_previousField;
-                        $this->_previousField = $field;
+                    $record->recordID = $this->_previousField->recordID;
+                    $record->formName = $this->_formName;
+                    $record[] = $this->_previousField;
+                    $this->_previousField = $field;
 
-                        return $record;
-                    }
-
-                    break;
+                    return $record;
 
                 case self::POS_END_OF_DOC:
                     if (null === $this->_previousField)
@@ -296,9 +299,9 @@ class RecordParser
                 $this->_position = self::POS_START_OF_FIELD;
                 break;
 
+            case 'FIELD_NAME':
             case 'RECORD':
             case 'REDCAP_EVENT_NAME':
-            case 'FIELD_NAME':
             case 'VALUE':
                 $this->_position = self::POS_IN_FIELD;
                 $this->_currentElementName = $tag;
