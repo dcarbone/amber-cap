@@ -47,23 +47,11 @@ class MetadataCollection extends AbstractItemCollection
     }
 
     /**
-     * @param AbstractItemCollection $collection
      * @param ItemInterface $item
      * @param string $keyProperty
      */
-    protected static function addItemToCollection(AbstractItemCollection $collection,
-                                                  ItemInterface $item,
-                                                  $keyProperty)
+    protected function addItem(ItemInterface $item, $keyProperty)
     {
-        if ($collection instanceof self)
-        {
-            $collection[sprintf('%s:%s', $item['form_name'], $item['field_name'])] = $item;
-        }
-        else
-        {
-            throw new \BadMethodCallException(
-                'Cannot utilize overloaded static method "addItemToCollection" on on class "MetadataCollection" with different collection class.'
-            );
-        }
+        $collection[sprintf('%s:%s', $item['form_name'], $item['field_name'])] = $item;
     }
 }

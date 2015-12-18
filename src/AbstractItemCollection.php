@@ -40,7 +40,7 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
     {
         throw new \BadMethodCallException(sprintf(
             '%s::createFromXMLString - Class %s must override base definition of this method.',
-            get_called_class(),
+            __CLASS__,
             get_called_class()
         ));
     }
@@ -52,7 +52,7 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
     {
         throw new \BadMethodCallException(sprintf(
             '%s::createFromXMLFile - Class %s must override base definition of this method.',
-            get_called_class(),
+            __CLASS__,
             get_called_class()
         ));
     }
@@ -246,7 +246,7 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
             $collection = new static();
             foreach($sxe->xpath(static::$itemNodeName) as $itemElement)
             {
-                static::addItemToCollection($collection, $itemClass::createFromSXE($itemElement), $keyProperty);
+                $collection->addItem($itemClass::createFromSXE($itemElement), $keyProperty);
             }
             return $collection;
         }
@@ -304,7 +304,7 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
                     switch($xmlReader->name)
                     {
                         case static::$itemNodeName:
-                            static::addItemToCollection($collection, $item, $keyProperty);
+                            $collection->addItem($item, $keyProperty);
                             $fieldName = null;
                             continue 3;
                     }
@@ -315,18 +315,15 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
     }
 
     /**
-     * @param AbstractItemCollection $collection
      * @param ItemInterface $item
      * @param string $keyProperty
+     * @internal
      */
-    protected static function addItemToCollection(
-        AbstractItemCollection $collection,
-        ItemInterface $item,
-        $keyProperty)
+    protected function addItem(ItemInterface $item, $keyProperty)
     {
         if (null === $keyProperty)
-            $collection[] = $item;
+            $this[] = $item;
         else
-            $collection[$item[$keyProperty]] = $item;
+            $this[$item[$keyProperty]] = $item;
     }
 }

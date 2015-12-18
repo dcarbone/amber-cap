@@ -229,24 +229,19 @@ class RecordParser
                         continue 2;
                     }
 
+                    if ($this->_mode === self::MODE_READ_FIELD)
+                    {
+                        $returnField = $this->_previousField;
+                        $this->_previousField = $field;
+                        return $returnField;
+                    }
+
                     if ($this->_previousField->recordID === $field->recordID)
                     {
-                        switch($this->_mode)
-                        {
-                            case self::MODE_READ_RECORD:
-                                $record[] = $this->_previousField;
-                                $this->_previousField = $field;
-                                $field = null;
-                                continue 3;
-
-                            case self::MODE_READ_FIELD:
-                                $returnField = $this->_previousField;
-                                $this->_previousField = $field;
-                                $field = null;
-                                return $returnField;
-
-                            default: return null;
-                        }
+                        $record[] = $this->_previousField;
+                        $this->_previousField = $field;
+                        $field = null;
+                        continue 2;
                     }
 
                     if ($this->_previousField->recordID !== $field->recordID)
@@ -254,22 +249,12 @@ class RecordParser
                         $this->_previousField->lastFieldInRecord = true;
                         $field->firstFieldInRecord = true;
 
-                        switch($this->_mode)
-                        {
-                            case self::MODE_READ_RECORD:
-                                $record->recordID = $this->_previousField->recordID;
-                                $record->formName = $this->_formName;
-                                $record[] = $this->_previousField;
-                                $this->_previousField = $field;
-                                return $record;
+                        $record->recordID = $this->_previousField->recordID;
+                        $record->formName = $this->_formName;
+                        $record[] = $this->_previousField;
+                        $this->_previousField = $field;
 
-                            case self::MODE_READ_FIELD:
-                                $returnField = $this->_previousField;
-                                $this->_previousField = $field;
-                                return $returnField;
-
-                            default: return null;
-                        }
+                        return $record;
                     }
 
                     break;
