@@ -52,6 +52,6 @@ class MetadataCollection extends AbstractItemCollection
      */
     protected function addItem(ItemInterface $item, $keyProperty)
     {
-        $collection[sprintf('%s:%s', $item['form_name'], $item['field_name'])] = $item;
+        $this[sprintf('%s:%s', $item['form_name'], $item['field_name'])] = $item;
     }
 }
