@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\AbstractItem;
+use DCarbone\AmberHat\Arm\ArmItemInterface;
 
 /**
  * Class EventItem
@@ -36,6 +37,9 @@ class EventItem extends AbstractItem implements EventItemInterface
         'offset_max' => null,
         'unique_event_name' => null,
     );
+
+    /** @var ArmItemInterface */
+    private $_arm;
 
     /**
      * @return string
@@ -91,5 +95,21 @@ class EventItem extends AbstractItem implements EventItemInterface
     public function __toString()
     {
         return $this->properties['unique_event_name'];
+    }
+
+    /**
+     * @param ArmItemInterface $arm
+     */
+    public function setArm(ArmItemInterface $arm)
+    {
+        $this->_arm = $arm;
+    }
+
+    /**
+     * @return ArmItemInterface
+     */
+    public function getArm()
+    {
+        return $this->_arm;
     }
 }

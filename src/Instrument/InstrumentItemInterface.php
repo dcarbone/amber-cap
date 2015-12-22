@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\ItemInterface;
+use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 
 /**
  * Interface InstrumentItemInterface
@@ -36,4 +37,14 @@ interface InstrumentItemInterface extends ItemInterface
      * @return string
      */
     public function getInstrumentLabel();
+
+    /**
+     * @param MetadataItemInterface $metadata
+     */
+    public function addFieldMetadata(MetadataItemInterface $metadata);
+
+    /**
+     * @return MetadataItemInterface[]
+     */
+    public function getFieldMetadata();
 }

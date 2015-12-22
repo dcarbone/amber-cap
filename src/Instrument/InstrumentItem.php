@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\AbstractItem;
+use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 
 /**
  * Class InstrumentItem
@@ -32,6 +33,9 @@ class InstrumentItem extends AbstractItem implements InstrumentItemInterface
         'instrument_name' => null,
         'instrument_label' => null
     );
+
+    /** @var MetadataItemInterface[] */
+    private $_fieldMetadata = array();
 
     /**
      * @return string
@@ -55,5 +59,18 @@ class InstrumentItem extends AbstractItem implements InstrumentItemInterface
     public function __toString()
     {
         return (string)$this->properties['instrument_name'];
+    }
+
+    /**
+     * @param MetadataItemInterface $metadata
+     */
+    public function addFieldMetadata(MetadataItemInterface $metadata)
+    {
+        $this->_fieldMetadata[$metadata['field_name']] = $metadata;
+    }
+
+    public function getFieldMetadata()
+    {
+        return $this->_fieldMetadata;
     }
 }

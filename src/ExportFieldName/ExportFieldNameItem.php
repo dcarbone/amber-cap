@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\AbstractItem;
+use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 
 /**
  * Class ExportFieldNameItem
@@ -33,6 +34,9 @@ class ExportFieldNameItem extends AbstractItem implements ExportFieldNameItemInt
         'choice_value' => null,
         'export_field_name' => null,
     );
+
+    /** @var MetadataItemInterface */
+    private $_metadataItem = null;
 
     /**
      * @return string
@@ -64,5 +68,21 @@ class ExportFieldNameItem extends AbstractItem implements ExportFieldNameItemInt
     public function __toString()
     {
         return (string)$this->properties['export_field_name'];
+    }
+
+    /**
+     * @param MetadataItemInterface $metadata
+     */
+    public function setFieldMetadata(MetadataItemInterface $metadata)
+    {
+        $this->_metadataItem = $metadata;
+    }
+
+    /**
+     * @return MetadataItemInterface
+     */
+    public function getFieldMetadata()
+    {
+        return $this->_metadataItem;
     }
 }

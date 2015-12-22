@@ -19,6 +19,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 use DCarbone\AmberHat\ItemInterface;
+use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 
 /**
  * Interface ExportFieldNameItemInterface
@@ -40,4 +41,14 @@ interface ExportFieldNameItemInterface extends ItemInterface
      * @return string
      */
     public function getExportFieldName();
+
+    /**
+     * @param MetadataItemInterface $metadata
+     */
+    public function setFieldMetadata(MetadataItemInterface $metadata);
+
+    /**
+     * @return MetadataItemInterface
+     */
+    public function getFieldMetadata();
 }

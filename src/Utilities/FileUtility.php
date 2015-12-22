@@ -53,7 +53,7 @@ abstract class FileUtility
                 }
 
                 // If we hit here, we're probably done with parsing headers...
-                if ($headerNum > 0 && strpos($line, 'HTTP/1.') !== 0)
+                if ($headerNum > 0 && $line !== "\r\n" && strpos($line, 'HTTP/1.') !== 0)
                     break;
 
                 $byteOffset = ftell($fh);

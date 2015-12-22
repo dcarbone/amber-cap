@@ -29,38 +29,8 @@ abstract class AbstractItem implements ItemInterface
     protected $properties = array();
 
     /**
-     * @param \SimpleXMLElement $sxe
-     * @return ItemInterface
-     */
-    public static function createFromSXE(\SimpleXMLElement $sxe)
-    {
-        $item = new static;
-        foreach($sxe->children() as $element)
-        {
-            /** @var \SimpleXMLElement $element */
-            /** @var \SimpleXMLElement[] $children */
-            $children = $element->children();
-            if (count($children) > 0)
-            {
-                $values = array();
-                foreach($children as $child)
-                {
-                    $values[$child->getName()] = (string)$child;
-                }
-
-                $item[$element->getName()] = $values;
-            }
-            else
-            {
-                $item[$element->getName()] = (string)$element;
-            }
-        }
-        return $item;
-    }
-
-    /**
      * @param array $data
-     * @return ItemInterface
+     * @return static
      */
     public static function createFromArray(array $data)
     {

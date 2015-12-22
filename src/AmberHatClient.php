@@ -19,7 +19,6 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use DCarbone\AmberHat\Information\ProjectInformation;
 use DCarbone\AmberHat\Metadata\MetadataCollection;
 use DCarbone\AmberHat\Record\RecordFieldFile;
 use DCarbone\AmberHat\Record\RecordFieldInterface;
@@ -91,92 +90,109 @@ class AmberHatClient implements CurlPlusClientContainerInterface
 
     /**
      * @param array $armNumbers
-     * @return \DCarbone\AmberHat\Arm\ArmsCollection
+     * @param string $format
+     * @return \DCarbone\CurlPlus\Response\CurlPlusResponse
      */
-    public function getArms(array $armNumbers = array())
+    public function exportArms(array $armNumbers = array(), $format = 'json')
     {
-        return $this->_createCollection(
-            '\\DCarbone\\AmberHat\\Arm\\ArmsCollection',
-            (string)$this->_executeRequest('arm', array('format' => 'xml', 'arms' => $armNumbers))
+        return $this->_executeRequest(
+            'arm',
+            array('format' => $format, 'arms' => $armNumbers),
+            false
         );
     }
 
     /**
      * @param array $armNumbers
-     * @return \DCarbone\AmberHat\Event\EventsCollection
+     * @param string $format
+     * @return \DCarbone\CurlPlus\Response\CurlPlusResponse
      */
-    public function getEvents(array $armNumbers = array())
+    public function exportEvents(array $armNumbers = array(), $format = 'json')
     {
-        return $this->_createCollection(
-            '\\DCarbone\\AmberHat\\Event\\EventsCollection',
-            (string)$this->_executeRequest('event', array('format' => 'xml', 'arms' => $armNumbers))
+        return $this->_executeRequest(
+            'event',
+            array('format' => $format, 'arms' => $armNumbers),
+            false
         );
     }
 
     /**
      * @param array $forms
      * @param array $fields
-     * @return MetadataCollection
+     * @param string $format
+     * @return \DCarbone\CurlPlus\Response\CurlPlusResponse
      */
-    public function getMetadata(array $forms = array(), array $fields = array())
+    public function exportMetadata(array $forms = array(), array $fields = array(), $format = 'json')
     {
-        return $this->_createCollection(
-            '\\DCarbone\\AmberHat\\Metadata\\MetadataCollection',
-            (string)$this->_executeRequest('metadata', array('format' => 'xml', 'forms' => $forms, 'fields' => $fields))
+        return $this->_executeRequest(
+            'metadata',
+            array('format' => $format, 'forms' => $forms, 'fields' => $fields),
+            false
         );
     }
 
     /**
-     * @return \DCarbone\AmberHat\ExportFieldName\ExportFieldNamesCollection
+     * @param string $format
+     * @return \DCarbone\CurlPlus\Response\CurlPlusResponse
      */
-    public function getExportFieldNames()
+    public function exportExportFieldNames($format = 'json')
     {
-        return $this->_createCollection(
-            '\\DCarbone\\AmberHat\\ExportFieldName\\ExportFieldNamesCollection',
-            (string)$this->_executeRequest('exportFieldNames', array('format' => 'xml'))
+        return $this->_executeRequest(
+            'exportFieldNames',
+            array('format' => $format),
+            false
         );
     }
 
     /**
-     * @return \DCarbone\AmberHat\Instrument\InstrumentsCollection
+     * @param string $format
+     * @return \DCarbone\CurlPlus\Response\CurlPlusResponse
      */
-    public function getInstruments()
+    public function exportInstruments($format = 'json')
     {
-        return $this->_createCollection(
-            '\\DCarbone\\AmberHat\\Instrument\\InstrumentsCollection',
-            (string)$this->_executeRequest('instrument', array('format' => 'xml'))
+        return $this->_executeRequest(
+            'instrument',
+            array('format' => $format),
+            false
         );
     }
 
     /**
-     * @return \DCarbone\AmberHat\FormEventMapping\FormEventMappingsCollection
+     * @param string $format
+     * @return \DCarbone\CurlPlus\Response\CurlPlusResponse
      */
-    public function getFormEventMappings()
+    public function exportFormEventMappings($format = 'json')
     {
-        return $this->_createCollection(
-            '\\DCarbone\\AmberHat\\FormEventMapping\\FormEventMappingsCollection',
-            (string)$this->_executeRequest('formEventMapping', array('format' => 'xml'))
+        return $this->_executeRequest(
+            'formEventMapping',
+            array('format' => $format),
+            false
         );
     }
 
     /**
-     * @return \DCarbone\AmberHat\User\UsersCollection
+     * @param string $format
+     * @return \DCarbone\CurlPlus\Response\CurlPlusResponse
      */
-    public function getUsers()
+    public function exportUsers($format = 'json')
     {
-        return $this->_createCollection(
-            '\\DCarbone\\AmberHat\\User\\UsersCollection',
-            (string)$this->_executeRequest('user', array('format' => 'xml'))
+        return $this->_executeRequest(
+            'user',
+            array('format' => $format),
+            false
         );
     }
 
     /**
-     * @return \DCarbone\AmberHat\Information\ProjectInformationInterface
+     * @param string $format
+     * @return \DCarbone\CurlPlus\Response\CurlPlusResponse
      */
-    public function getProjectInformation()
+    public function exportProjectInformation($format = 'json')
     {
-        return ProjectInformation::createWithXMLString(
-            (string)$this->_executeRequest('project', array('format' => 'xml'), false)
+        return $this->_executeRequest(
+            'project',
+            array('format' => $format),
+            false
         );
     }
 
@@ -184,22 +200,22 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      * @param string $formName
      * @param array $fields
      * @param array $events
-     * @param MetadataCollection|null $metadataCollection
-     * @return RecordParser
+     * @return \DCarbone\CurlPlus\Response\CurlPlusFileResponse
      */
-    public function getRecords($formName,
-                               array $fields = array(),
-                               array $events = array(),
-                               MetadataCollection $metadataCollection = null)
+    public function exportFormRecords($formName,
+                                      array $fields = array(),
+                                      array $events = array())
     {
-        $filename = (string)$this->_executeRequest(
+        return $this->_executeRequest(
             'record',
-            array('format' => 'xml', 'type' => 'eav', 'forms' => $formName, 'events' => $events, 'fields' => $fields)
+            array(
+                'format' => 'xml',
+                'type' => 'eav',
+                'forms' => $formName,
+                'events' => $events,
+                'fields' => $fields
+            )
         );
-
-        $parser = RecordParser::createWithXMLFile($filename, $formName, $metadataCollection);
-
-        return $parser;
     }
 
     /**
@@ -207,7 +223,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      * @param null $outputDir
      * @return \DCarbone\AmberHat\Record\RecordFieldFileInterface|string
      */
-    public function getFile(RecordFieldInterface $recordField, $outputDir = null)
+    public function exportFile(RecordFieldInterface $recordField, $outputDir = null)
     {
         if (null === $outputDir)
             $outputDir = $this->_tempDirectory;
@@ -303,7 +319,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     /**
      * @return string
      */
-    public function getREDCapVersion()
+    public function exportREDCapVersion()
     {
         if (null === $this->_redcapVersion)
             $this->_redcapVersion = (string)$this->_executeRequest('version', array('format' => 'xml'), false);
@@ -326,23 +342,6 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     public function _getCachedFiles()
     {
         return $this->_files;
-    }
-
-    /**
-     * @param string $collectionClass
-     * @param string $filename
-     * @return \DCarbone\AmberHat\AbstractItemCollection
-     */
-    private function _createCollection($collectionClass, $filename)
-    {
-        /** @var \DCarbone\AmberHat\AbstractItemCollection $collectionClass */
-
-        if (filesize($filename) < self::MAX_MEMORY_FILESIZE)
-            $collection = $collectionClass::createFromXMLString(file_get_contents($filename));
-        else
-            $collection = $collectionClass::createFromXMLFile($filename);
-
-        return $collection;
     }
 
     /**

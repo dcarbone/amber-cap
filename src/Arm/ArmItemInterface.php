@@ -19,6 +19,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\Event\EventItemInterface;
 use DCarbone\AmberHat\ItemInterface;
 
 /**
@@ -36,4 +37,14 @@ interface ArmItemInterface extends ItemInterface
      * @return string
      */
     public function getName();
+
+    /**
+     * @param EventItemInterface $eventItem
+     */
+    public function addEvent(EventItemInterface $eventItem);
+
+    /**
+     * @return EventItemInterface[]
+     */
+    public function getEvents();
 }

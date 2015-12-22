@@ -25,37 +25,13 @@
  */
 abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iterator, \Serializable
 {
-    /** @var string */
-    protected static $rootNodeName = 'records';
-    /** @var string */
-    protected static $itemNodeName = 'item';
-
     /** @var array */
     protected $items = array();
 
     /**
-     * @param string $xml
+     * @param array $itemData
      */
-    public static function createFromXMLString($xml)
-    {
-        throw new \BadMethodCallException(sprintf(
-            '%s::createFromXMLString - Class %s must override base definition of this method.',
-            __CLASS__,
-            get_called_class()
-        ));
-    }
-
-    /**
-     * @param string $file
-     */
-    public static function createFromXMLFile($file)
-    {
-        throw new \BadMethodCallException(sprintf(
-            '%s::createFromXMLFile - Class %s must override base definition of this method.',
-            __CLASS__,
-            get_called_class()
-        ));
-    }
+    abstract public function buildAndAppendItem(array $itemData);
 
     /**
      * Return the current element
@@ -195,11 +171,7 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
      */
     public function serialize()
     {
-        return serialize(array(
-            static::$rootNodeName,
-            static::$itemNodeName,
-            $this->items
-        ));
+        return serialize($this->items);
     }
 
     /**
@@ -212,11 +184,9 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
     public function unserialize($serialized)
     {
         $data = unserialize($serialized);
-        if (count($data) === 3 && is_string($data[0]) && is_string($data[1]) && is_array($data[2]))
+        if (count($data) === 1 && is_array($data[0]))
         {
-            static::$rootNodeName = $data[0];
-            static::$itemNodeName = $data[1];
-            $this->items = $data[2];
+            $this->items = $data[0];
         }
         else
         {
@@ -238,103 +208,5 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
     public function count()
     {
         return count($this->items);
-    }
-
-    /**
-     * @param string $xml
-     * @param string $itemClass
-     * @param string $keyProperty
-     * @return AbstractItemCollection
-     * @internal
-     */
-    protected static function processXMLString($xml, $itemClass, $keyProperty = null)
-    {
-        /** @var \DCarbone\AmberHat\AbstractItem $itemClass */
-
-        $sxe = new \SimpleXMLElement($xml, LIBXML_COMPACT | LIBXML_NOBLANKS);
-        if ($sxe instanceof \SimpleXMLElement)
-        {
-            $collection = new static();
-            foreach($sxe->xpath(static::$itemNodeName) as $itemElement)
-            {
-                $collection->addItem($itemClass::createFromSXE($itemElement), $keyProperty);
-            }
-            return $collection;
-        }
-
-        throw new \InvalidArgumentException('Unable to parse provided XML string.');
-    }
-
-    /**
-     * @param string $file
-     * @param string $itemClass
-     * @param string $keyProperty
-     * @return AbstractItemCollection
-     * @internal
-     */
-    protected static function processXMLFile($file, $itemClass, $keyProperty = null)
-    {
-        $xmlReader = new \XMLReader();
-        $xmlReader->open($file);
-
-        $collection = new static();
-        $fieldName = null;
-        $item = null;
-        while ($xmlReader->read())
-        {
-            switch($xmlReader->nodeType)
-            {
-                case \XMLReader::ELEMENT:
-                    switch($xmlReader->name)
-                    {
-                        case static::$itemNodeName:
-                            $item = new $itemClass();
-                            continue 3;
-
-                        case static::$rootNodeName:
-                            continue 3;
-
-                        default:
-                            $fieldName = $xmlReader->name;
-                            continue 3;
-                    }
-
-                // If the provided XML has been modified from the default
-                // structure of having values contained within CDATA blocks.
-                case \XMLReader::TEXT:
-                    if (null !== $fieldName && '' !== ($value = trim($xmlReader->value)))
-                        $item[$fieldName] = $value;
-                    continue 2;
-
-                case \XMLReader::CDATA:
-                    $item[$fieldName] = trim($xmlReader->value);
-                    $fieldName = null;
-                    continue 2;
-
-                case \XMLReader::END_ELEMENT:
-                    switch($xmlReader->name)
-                    {
-                        case static::$itemNodeName:
-                            $collection->addItem($item, $keyProperty);
-                            $fieldName = null;
-                            continue 3;
-                    }
-            }
-        }
-
-        return $collection;
-    }
-
-    /**
-     * @param ItemInterface $item
-     * @param string $keyProperty
-     * @internal
-     */
-    protected function addItem(ItemInterface $item, $keyProperty)
-    {
-        if (null === $keyProperty)
-            $this[] = $item;
-        else
-            $this[$item[$keyProperty]] = $item;
     }
 }

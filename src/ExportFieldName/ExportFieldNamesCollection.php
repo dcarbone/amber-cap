@@ -20,7 +20,6 @@
  */
 
 use DCarbone\AmberHat\AbstractItemCollection;
-use DCarbone\AmberHat\ItemInterface;
 use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 
 /**
@@ -29,17 +28,12 @@ use DCarbone\AmberHat\Metadata\MetadataItemInterface;
  */
 class ExportFieldNamesCollection extends AbstractItemCollection
 {
-    /** @var string */
-    protected static $rootNodeName = 'fields';
-    /** @var string */
-    protected static $itemNodeName = 'field';
-
     /** @var array */
     private $_originalToExportNameMap = array();
 
     /**
      * @param string $originalFieldName
-     * @return array|null
+     * @return string[]|null
      */
     public function getExportFieldNamesForField($originalFieldName)
     {
@@ -51,35 +45,23 @@ class ExportFieldNamesCollection extends AbstractItemCollection
 
     /**
      * @param MetadataItemInterface $metadataItem
-     * @return array|null
+     * @return ExportFieldNameItemInterface[]|null
      */
     public function getExportFieldsForMetadataItem(MetadataItemInterface $metadataItem)
     {
-        return $this->getExportFieldNamesForField($metadataItem->getFieldName());
-    }
+        $names = $this->getExportFieldNamesForField($metadataItem['field_name']);
 
-    /**
-     * @param string $xml
-     * @return ExportFieldNamesCollection
-     */
-    public static function createFromXMLString($xml)
-    {
-        return self::processXMLString(
-            $xml,
-            '\\DCarbone\\AmberHat\\ExportFieldName\\ExportFieldNameItem',
-            'export_field_name');
-    }
+        if ($names)
+        {
+            $exportFields = array();
+            foreach($names as $exportFieldName)
+            {
+                $exportFields[$exportFieldName] = $this[$exportFieldName];
+            }
+            return $exportFields;
+        }
 
-    /**
-     * @param string $file
-     * @return ExportFieldNamesCollection
-     */
-    public static function createFromXMLFile($file)
-    {
-        return self::processXMLFile(
-            $file,
-            '\\DCarbone\\AmberHat\\ExportFieldName\\ExportFieldNameItem',
-            'export_field_name');
+        return null;
     }
 
     /**
@@ -91,8 +73,6 @@ class ExportFieldNamesCollection extends AbstractItemCollection
     public function serialize()
     {
         return serialize(array(
-            static::$rootNodeName,
-            static::$itemNodeName,
             $this->items,
             $this->_originalToExportNameMap
         ));
@@ -108,12 +88,10 @@ class ExportFieldNamesCollection extends AbstractItemCollection
     public function unserialize($serialized)
     {
         $data = unserialize($serialized);
-        if (count($data) === 4 && is_string($data[0]) && is_string($data[1]) && is_array($data[2]) && is_array($data[3]))
+        if (count($data) === 2 && is_array($data[0]) && is_array($data[1]))
         {
-            static::$rootNodeName = $data[0];
-            static::$itemNodeName = $data[1];
-            $this->items = $data[2];
-            $this->_originalToExportNameMap = $data[3];
+            $this->items = $data[0];
+            $this->_originalToExportNameMap = $data[1];
         }
         else
         {
@@ -125,36 +103,23 @@ class ExportFieldNamesCollection extends AbstractItemCollection
     }
 
     /**
-     * @param AbstractItemCollection $collection
-     * @param ItemInterface $item
-     * @param string $keyProperty
+     * @param array $itemData
      */
-    protected static function addItemToCollection(
-        AbstractItemCollection $collection,
-        ItemInterface $item,
-        $keyProperty)
+    public function buildAndAppendItem(array $itemData)
     {
-        if ($collection instanceof self)
+        $item = ExportFieldNameItem::createFromArray($itemData);
+        $this[$item['export_field_name']] = $item;
+
+        if (null === $item['choice_value'] || '' === $item['choice_value'])
         {
-            $collection[$item['export_field_name']] = $item;
-
-            if ($item['choice_value'] === '')
-            {
-                $collection->_originalToExportNameMap[$item['original_field_name']] = $item['export_field_name'];
-            }
-            else
-            {
-                if (!isset($collection->_originalToExportNameMap[$item['original_field_name']]))
-                    $collection->_originalToExportNameMap[$item['original_field_name']] = array();
-
-                $collection->_originalToExportNameMap[$item['original_field_name']][$item['choice_value']] = $item['export_field_name'];
-            }
+            $this->_originalToExportNameMap[$item['original_field_name']] = $item['export_field_name'];
         }
         else
         {
-            throw new \BadMethodCallException(
-                'Cannot utilize overloaded static method "addItemToCollection" on on class "ExportFieldNamesCollection" with different collection class.'
-            );
+            if (!isset($this->_originalToExportNameMap[$item['original_field_name']]))
+                $this->_originalToExportNameMap[$item['original_field_name']] = array();
+
+            $this->_originalToExportNameMap[$item['original_field_name']][$item['choice_value']] = $item['export_field_name'];
         }
     }
 }

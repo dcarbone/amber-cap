@@ -26,7 +26,8 @@
         "lib-pcre": "*",
         "ext-date": "*",
         "ext-SPL": "*",
-        "dcarbone/curl-plus": "2.0.*"
+        "dcarbone/curl-plus": "2.0.*",
+        "dcarbone/helpers": "7.0.*"
     },
 
     "suggest": {

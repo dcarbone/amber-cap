@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\AbstractItemCollection;
+use DCarbone\AmberHat\Arm\ArmsCollection;
 
 /**
  * Class EventsCollection
@@ -27,21 +28,32 @@ use DCarbone\AmberHat\AbstractItemCollection;
  */
 class EventsCollection extends AbstractItemCollection
 {
+    /** @var ArmsCollection|null */
+    private $_armsCollection;
+
     /**
-     * @param string $xml
-     * @return EventsCollection
+     * Constructor
+     *
+     * @param ArmsCollection|null $armsCollection
      */
-    public static function createFromXMLString($xml)
+    public function __construct(ArmsCollection $armsCollection = null)
     {
-        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Event\\EventItem', 'event_name');
+        $this->_armsCollection = $armsCollection;
     }
 
     /**
-     * @param string $file
-     * @return EventsCollection
+     * @param array $itemData
      */
-    public static function createFromXMLFile($file)
+    public function buildAndAppendItem(array $itemData)
     {
-        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Event\\EventItem', 'event_name');
+        $item = EventItem::createFromArray($itemData);
+        if (isset($this->_armsCollection) && isset($this->_armsCollection[$item['arm_num']]))
+        {
+            /** @var \DCarbone\AmberHat\Arm\ArmItemInterface $arm */
+            $arm = $this->_armsCollection[$item['arm_num']];
+            $arm->addEvent($item);
+            $item->setArm($arm);
+        }
+        $this[$item['unique_event_name']] = $item;
     }
 }

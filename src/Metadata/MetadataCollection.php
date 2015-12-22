@@ -20,6 +20,8 @@
  */
 
 use DCarbone\AmberHat\AbstractItemCollection;
+use DCarbone\AmberHat\ExportFieldName\ExportFieldNamesCollection;
+use DCarbone\AmberHat\Instrument\InstrumentsCollection;
 use DCarbone\AmberHat\ItemInterface;
 
 /**
@@ -28,22 +30,30 @@ use DCarbone\AmberHat\ItemInterface;
  */
 class MetadataCollection extends AbstractItemCollection
 {
-    /**
-     * @param string $xml
-     * @return MetadataCollection
-     */
-    public static function createFromXMLString($xml)
-    {
-        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem');
-    }
+    /** @var ExportFieldNamesCollection|null */
+    private $_exportFieldNames;
+    /** @var InstrumentsCollection|null */
+    private $_instruments;
 
     /**
-     * @param string $file
-     * @return MetadataCollection
+     * Constructor
+     *
+     * @param ExportFieldNamesCollection|null $exportFieldNames
+     * @param InstrumentsCollection|null $instruments
      */
-    public static function createFromXMLFile($file)
+    public function __construct(ExportFieldNamesCollection $exportFieldNames = null,
+                                InstrumentsCollection $instruments = null)
     {
-        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Metadata\\MetadataItem');
+        $this->_exportFieldNames = $exportFieldNames;
+        $this->_instruments = $instruments;
+    }
+
+    public function buildAndAppendItem(array $itemData)
+    {
+        $item = MetadataItem::createFromArray($itemData);
+//        if (isset($this->_exportFieldNames) && )
+
+        $this[sprintf('%s:%s', $item['form_name'], $item['field_name'])] = $item;
     }
 
     /**
@@ -52,6 +62,6 @@ class MetadataCollection extends AbstractItemCollection
      */
     protected function addItem(ItemInterface $item, $keyProperty)
     {
-        $this[sprintf('%s:%s', $item['form_name'], $item['field_name'])] = $item;
+
     }
 }

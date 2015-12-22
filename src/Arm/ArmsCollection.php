@@ -28,20 +28,11 @@ use DCarbone\AmberHat\AbstractItemCollection;
 class ArmsCollection extends AbstractItemCollection
 {
     /**
-     * @param string $xml
-     * @return ArmsCollection
+     * @param array $itemData
      */
-    public static function createFromXMLString($xml)
+    public function buildAndAppendItem(array $itemData)
     {
-        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\Arm\\ArmItem', 'arm_num');
-    }
-
-    /**
-     * @param string $file
-     * @return ArmsCollection
-     */
-    public static function createFromXMLFile($file)
-    {
-        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\Arm\\ArmItem', 'arm_num');
+        $item = ArmItem::createFromArray($itemData);
+        $this[$item['arm_num']] = $item;
     }
 }
