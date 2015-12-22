@@ -19,11 +19,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use DCarbone\AmberHat\Metadata\MetadataCollection;
-use DCarbone\AmberHat\Record\RecordFieldFile;
 use DCarbone\AmberHat\Record\RecordFieldInterface;
-use DCarbone\AmberHat\Record\RecordParser;
-use DCarbone\AmberHat\Utilities\FileUtility;
 use DCarbone\CurlPlus\CurlPlusClient;
 use DCarbone\CurlPlus\CurlPlusClientContainerInterface;
 
@@ -272,8 +268,6 @@ class AmberHatClient implements CurlPlusClientContainerInterface
             true,
             false
         );
-
-
     }
 
     /**
