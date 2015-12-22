@@ -54,9 +54,16 @@ class ExportFieldNamesCollection extends AbstractItemCollection
         if ($names)
         {
             $exportFields = array();
-            foreach($names as $exportFieldName)
+            if (is_array($names))
             {
-                $exportFields[$exportFieldName] = $this[$exportFieldName];
+                foreach($names as $exportFieldName)
+                {
+                    $exportFields[$exportFieldName] = $this[$exportFieldName];
+                }
+            }
+            else
+            {
+                $exportFields[$names] = $this[$names];
             }
             return $exportFields;
         }
