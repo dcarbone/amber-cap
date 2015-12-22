@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\Metadata\MetadataCollection;
+use DCarbone\AmberHat\Utilities\ValueUtility;
 
 /**
  * Class RecordParser
@@ -35,13 +36,6 @@ class RecordParser
     const POS_IN_FIELD       = 30;
     const POS_END_OF_FIELD   = 40;
     const POS_END_OF_DOC     = 50;
-
-    /**
-     * Thank you to http://stackoverflow.com/a/1401716/1141357 for the below regex
-     *
-     * @var string
-     */
-    private static $_invalidByteRemovalRegex = '/((?:[\x00-\x7F]|[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}){1,100})|./Sx';
 
     /** @var resource */
     private $_fh;
@@ -196,7 +190,7 @@ class RecordParser
 
         while ($line = fgets($this->_fh))
         {
-            xml_parse($this->_parser, preg_replace(self::$_invalidByteRemovalRegex, '$1', $line));
+            xml_parse($this->_parser, ValueUtility::utf8ByteFix($line));
 
             switch($this->_position)
             {
@@ -217,7 +211,7 @@ class RecordParser
                         $this->_getMetadataItem($this->_fieldName)
                     );
 
-                    // This...probably is not useful.
+                    // Reset stored field values.
                     $this->_recordID = null;
                     $this->_redcapEventName = null;
                     $this->_fieldName = null;
@@ -268,18 +262,11 @@ class RecordParser
 
                     $this->_previousField->lastFieldInRecord = true;
 
-                    switch($this->_mode)
-                    {
-                        case self::MODE_READ_RECORD:
-                            $record[] = $this->_previousField;
-                            return $record;
+                    if ($this->_mode === self::MODE_READ_FIELD)
+                        return $this->_previousField;
 
-                        case self::MODE_READ_FIELD:
-                            return $this->_previousField;
-
-                        default:
-                            return null;
-                    }
+                    $record[] = $this->_previousField;
+                    return $record;
             }
         }
 

@@ -26,10 +26,17 @@
 class ValueUtility
 {
     /**
+     * Thanks to http://stackoverflow.com/a/1401716/1141357 for the below regex
+     *
+     * @var string
+     */
+    private static $_invalidByteRemovalRegex = '/((?:[\x00-\x7F]|[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}){1,100})|./Sx';
+
+    /**
      * @param $fieldValue
      * @return string|null
      */
-    public static function getMetadataItemDateTimeFormatString($fieldValue)
+    public static function getFieldDateTimeFormatString($fieldValue)
     {
         static $testRegex = array(
             '/(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)/' => 'Y-m-d',
@@ -45,5 +52,14 @@ class ValueUtility
         }
 
         return null;
+    }
+
+    /**
+     * @param string $input
+     * @return string
+     */
+    public static function utf8ByteFix($input)
+    {
+        return preg_replace(self::$_invalidByteRemovalRegex, '$1', $input);
     }
 }

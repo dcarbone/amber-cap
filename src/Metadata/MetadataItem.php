@@ -241,7 +241,7 @@ class MetadataItem extends AbstractItem implements MetadataItemInterface
         if (false === $this->_dateFormatSought)
         {
             if ($this->isDateTimeField())
-                $this->_dateTimeFormatString = ValueUtility::getMetadataItemDateTimeFormatString($fieldValue);
+                $this->_dateTimeFormatString = ValueUtility::getFieldDateTimeFormatString($fieldValue);
             else
                 $this->_dateTimeFormatString = false;
 

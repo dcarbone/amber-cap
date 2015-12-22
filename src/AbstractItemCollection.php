@@ -140,7 +140,11 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
         if (isset($this->items[$offset]))
             return $this->items[$offset];
 
-        throw new \OutOfRangeException('Key "'.$offset.'" does not exist in this MetadataCollection.');
+        throw new \OutOfRangeException(sprintf(
+            '%s::offsetGet - Offset "%s" does not exist.',
+            get_class($this),
+            $offset
+        ));
     }
 
     /**
@@ -153,13 +157,20 @@ abstract class AbstractItemCollection implements \ArrayAccess, \Countable, \Iter
      */
     public function offsetSet($offset, $value)
     {
-        if (is_string($offset) && is_object($value) && $value instanceof ItemInterface)
+        if (is_object($value) && $value instanceof ItemInterface)
         {
-            $this->items[$offset] = $value;
-            return;
+            if (null === $offset)
+                $this->items[] = $value;
+            else
+                $this->items[$offset] = $value;
         }
-
-        throw new \DomainException('Redcap collections only accept string keys and object values which implement ItemInterface');
+        else
+        {
+            throw new \DomainException(sprintf(
+                '%s::offsetSet - Item Collection children must implement ItemInterface',
+                get_class($this)
+            ));
+        }
     }
 
     /**
