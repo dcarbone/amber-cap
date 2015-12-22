@@ -267,7 +267,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
             sprintf(
                 '%s/%s',
                 $this->_tempDirectory,
-                sha1(sprintf('%s%s%s', $recordField->formName, $recordField->fieldName, rand(0, 100)))
+                sha1(sprintf('%s%s%s', $recordField->instrumentName, $recordField->fieldName, rand(0, 100)))
             ),
             true,
             false
@@ -281,7 +281,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
                 sprintf(
                     '%s::getFile - Unable to parse headers from response, this could be cause either by a malformed response or improper CURLOPT specification.  Form Name: %s, Field Name: %s, Record ID: %s',
                     get_class($this),
-                    $recordField->formName,
+                    $recordField->instrumentName,
                     $recordField->fieldName,
                     $recordField->recordID
                 ),
@@ -310,7 +310,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
         throw new \RuntimeException(sprintf(
             '%s::getFile - Unable to determine filename from response headers.  Form: %s, Field Name: %s, Record ID: %s',
             get_class($this),
-            $recordField->formName,
+            $recordField->instrumentName,
             $recordField->fieldName,
             $recordField->recordID
         ));

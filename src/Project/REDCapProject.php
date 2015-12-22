@@ -25,8 +25,10 @@ use DCarbone\AmberHat\Event\EventsCollection;
 use DCarbone\AmberHat\ExportFieldName\ExportFieldNamesCollection;
 use DCarbone\AmberHat\FormEventMapping\FormEventMappingsCollection;
 use DCarbone\AmberHat\Information\ProjectInformation;
+use DCarbone\AmberHat\Instrument\InstrumentItemInterface;
 use DCarbone\AmberHat\Instrument\InstrumentsCollection;
 use DCarbone\AmberHat\Metadata\MetadataCollection;
+use DCarbone\AmberHat\Record\RecordParser;
 use DCarbone\AmberHat\Utilities\ParserUtility;
 
 /**
@@ -226,8 +228,6 @@ class REDCapProject
         return $this->_information;
     }
 
-
-
     /**
      * @return array
      */
@@ -254,5 +254,21 @@ class REDCapProject
     public function getFormNames()
     {
         return $this->getInstrumentNames();
+    }
+
+    /**
+     * @param InstrumentItemInterface|string $instrument
+     * @return RecordParser
+     */
+    public function getInstrumentRecordParser($instrument)
+    {
+        if ($instrument instanceof InstrumentItemInterface)
+            $instrument = $instrument->getInstrumentName();
+
+        return RecordParser::createWithXMLFile(
+            $this->_client->exportFormRecords($instrument),
+            $instrument,
+            $this->getMetadata()
+        );
     }
 }

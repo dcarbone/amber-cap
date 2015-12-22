@@ -30,7 +30,7 @@ class RecordField implements RecordFieldInterface
     /** @var string */
     public $recordID;
     /** @var string */
-    public $formName;
+    public $instrumentName;
     /** @var string|null */
     public $redcapEventName;
 
@@ -50,21 +50,21 @@ class RecordField implements RecordFieldInterface
     /**
      * Constructor
      * @param $recordID
-     * @param $formName
+     * @param $instrumentName
      * @param string $fieldName
      * @param string $fieldValue
      * @param null $redcapEventName
      * @param MetadataItemInterface|null $metadataItem
      */
     public function __construct($recordID,
-                                $formName,
+                                $instrumentName,
                                 $fieldName,
                                 $fieldValue,
                                 $redcapEventName = null,
                                 MetadataItemInterface $metadataItem = null)
     {
         $this->recordID = $recordID;
-        $this->formName = $formName;
+        $this->instrumentName = $instrumentName;
         $this->fieldName = $fieldName;
         $this->fieldValue = $fieldValue;
         $this->redcapEventName = $redcapEventName;
@@ -82,9 +82,9 @@ class RecordField implements RecordFieldInterface
     /**
      * @return string
      */
-    public function getFormName()
+    public function getInstrumentName()
     {
-        return $this->formName;
+        return $this->instrumentName;
     }
 
     /**
@@ -145,7 +145,7 @@ class RecordField implements RecordFieldInterface
     {
         return serialize(array(
             $this->recordID,
-            $this->formName,
+            $this->instrumentName,
             $this->fieldName,
             $this->fieldValue,
             $this->firstFieldInRecord,
@@ -176,7 +176,7 @@ class RecordField implements RecordFieldInterface
             && (null === $data[7] || is_string($data[7])))
         {
             $this->recordID = $data[0];
-            $this->formName = $data[1];
+            $this->instrumentName = $data[1];
             $this->fieldName = $data[2];
             $this->fieldValue = $data[3];
             $this->firstFieldInRecord = $data[4];
@@ -200,7 +200,7 @@ class RecordField implements RecordFieldInterface
     {
         return array(
             'recordID' => $this->recordID,
-            'formName' => $this->formName,
+            'instrumentName' => $this->instrumentName,
             'fieldName' => $this->fieldName,
             'fieldValue' => $this->fieldValue,
             'firstFieldInRecord' => $this->firstFieldInRecord,

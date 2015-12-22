@@ -47,7 +47,7 @@ class RecordParser
     private $_metadataCollection;
 
     /** @var string */
-    private $_formName;
+    private $_instrumentName;
 
     /** @var int */
     private $_mode;
@@ -73,12 +73,12 @@ class RecordParser
     /**
      * Constructor
      *
-     * @param string $formName
+     * @param string $instrumentName
      * @param MetadataCollection|null $metadataCollection
      */
-    protected function __construct($formName, MetadataCollection $metadataCollection = null)
+    protected function __construct($instrumentName, MetadataCollection $metadataCollection = null)
     {
-        $this->_formName = $formName;
+        $this->_instrumentName = $instrumentName;
         $this->_metadataCollection = $metadataCollection;
 
         $this->_mode = self::MODE_READ_FIELD;
@@ -204,7 +204,7 @@ class RecordParser
                 case self::POS_END_OF_FIELD:
                     $field = new RecordField(
                         $this->_recordID,
-                        $this->_formName,
+                        $this->_instrumentName,
                         $this->_fieldName,
                         $this->_fieldValue,
                         $this->_redcapEventName,
@@ -250,7 +250,7 @@ class RecordParser
                     $field->firstFieldInRecord = true;
 
                     $record->recordID = $this->_previousField->recordID;
-                    $record->formName = $this->_formName;
+                    $record->formName = $this->_instrumentName;
                     $record[] = $this->_previousField;
                     $this->_previousField = $field;
 
@@ -363,12 +363,12 @@ class RecordParser
         if (!isset($this->_metadataCollection))
             return null;
 
-        $key = sprintf('%s:%s', $this->_formName, $exportFieldName);
+        $key = sprintf('%s:%s', $this->_instrumentName, $exportFieldName);
 
         if (isset($this->_metadataCollection[$key]))
             return $this->_metadataCollection[$key];
 
-        $key = sprintf('%s:%s', $this->_formName, preg_replace('/(___[a-zA-Z0-9]+$)/', '', $exportFieldName));
+        $key = sprintf('%s:%s', $this->_instrumentName, preg_replace('/(___[a-zA-Z0-9]+$)/', '', $exportFieldName));
 
         if (isset($this->_metadataCollection[$key]))
             return $this->_metadataCollection[$key];

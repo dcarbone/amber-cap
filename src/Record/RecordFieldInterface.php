@@ -26,7 +26,7 @@ use DCarbone\AmberHat\JsonSerializableCompatible;
  * @package DCarbone\AmberHat\Record
  *
  * @property string recordID
- * @property string formName
+ * @property string $instrumentName
  * @property string|null redcapEventName
  * @property string fieldName
  * @property string fieldValue
@@ -43,7 +43,7 @@ interface RecordFieldInterface extends \Serializable, JsonSerializableCompatible
     /**
      * @return string
      */
-    public function getFormName();
+    public function getInstrumentName();
 
     /**
      * @return string
