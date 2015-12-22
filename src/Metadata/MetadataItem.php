@@ -20,6 +20,8 @@
  */
 
 use DCarbone\AmberHat\AbstractItem;
+use DCarbone\AmberHat\ExportFieldName\ExportFieldNameItemInterface;
+use DCarbone\AmberHat\Instrument\InstrumentItemInterface;
 use DCarbone\AmberHat\Utilities\ValueUtility;
 
 /**
@@ -53,9 +55,6 @@ class MetadataItem extends AbstractItem implements MetadataItemInterface
     /** @var null|array */
     private $_fieldChoiceArray;
 
-    /** @var null|array */
-    private $_exportFieldNames;
-
     /** @var string|false */
     private $_dateTimeFormatString;
 
@@ -64,6 +63,11 @@ class MetadataItem extends AbstractItem implements MetadataItemInterface
 
     /** @var bool */
     private $_dateFormatSought = false;
+
+    /** @var ExportFieldNameItemInterface[] */
+    private $_exportFieldNames = null;
+    /** @var InstrumentItemInterface */
+    private $_instrument = null;
 
     /**
      * @return null|string
@@ -254,27 +258,6 @@ class MetadataItem extends AbstractItem implements MetadataItemInterface
     /**
      * @return array
      */
-    public function getExportFieldNames()
-    {
-        if(!isset($this->_exportFieldNames))
-        {
-            switch($this->properties['field_type'])
-            {
-                case 'checkbox':
-                    $this->_createCheckboxExportNameArray();
-                    break;
-
-                default:
-                    $this->_exportFieldNames = array($this->properties['field_name']);
-            }
-        }
-
-        return $this->_exportFieldNames;
-    }
-
-    /**
-     * @return array
-     */
     public function getFieldChoiceArray()
     {
         if (isset($this->_fieldChoiceArray))
@@ -304,8 +287,48 @@ class MetadataItem extends AbstractItem implements MetadataItemInterface
     }
 
     /**
-     * @param string $exportFieldName
-     * @return string|null
+     * @param ExportFieldNameItemInterface $exportFieldName
+     */
+    public function addExportFieldNameItem(ExportFieldNameItemInterface $exportFieldName)
+    {
+        $this->_exportFieldNames[] = $exportFieldName;
+    }
+
+    /**
+     * @return \DCarbone\AmberHat\ExportFieldName\ExportFieldNameItemInterface[]
+     */
+    public function getExportFieldNameItems()
+    {
+        return $this->_exportFieldNames;
+    }
+
+    /**
+     * @param InstrumentItemInterface $instrument
+     */
+    public function setInstrumentItem(InstrumentItemInterface $instrument)
+    {
+        $this->_instrument = $instrument;
+    }
+
+    /**
+     * @return InstrumentItemInterface
+     */
+    public function getInstrumentItem()
+    {
+        return $this->_instrument;
+    }
+
+    /**
+     * @return InstrumentItemInterface
+     */
+    public function getFormItem()
+    {
+        return $this->getInstrumentItem();
+    }
+
+    /**
+     * @param ExportFieldNameItemInterface|string $exportFieldName
+     * @return array|null
      */
     public function getChoiceValueByExportFieldName($exportFieldName)
     {
@@ -313,19 +336,21 @@ class MetadataItem extends AbstractItem implements MetadataItemInterface
         if (count($choices) === 0)
             return null;
 
-        $exportNames = $this->getExportFieldNames();
-        $idx = array_search($exportFieldName, $exportNames, true);
-        if (-1 === $idx)
+        if ($exportFieldName instanceof ExportFieldNameItemInterface)
+            $exportFieldName = $exportFieldName['export_field_name'];
+
+        if (!isset($this->_exportFieldNames))
             return null;
 
-        $i = 0;
-        while ($i !== $idx)
+        if (isset($this->_exportFieldNames[$exportFieldName]))
         {
-            next($choices);
-            $i++;
+            return array(
+                $this->_exportFieldNames[$exportFieldName]['choice_value'] =>
+                $choices[$this->_exportFieldNames[$exportFieldName]['choice_value']]
+            );
         }
 
-        return current($choices);
+        return null;
     }
 
     /**
@@ -334,16 +359,6 @@ class MetadataItem extends AbstractItem implements MetadataItemInterface
     public function __toString()
     {
         return $this->properties['field_name'];
-    }
-
-    private function _createCheckboxExportNameArray()
-    {
-        $choices = $this->getFieldChoiceArray();
-        $this->_exportFieldNames = array();
-        foreach($choices as $k=>$v)
-        {
-            $this->_exportFieldNames[] = sprintf('%s___%s', $this->properties['field_name'], $k);
-        }
     }
 
     private function _parseMultiChoiceFieldData()

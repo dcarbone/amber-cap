@@ -73,7 +73,7 @@ class ExportFieldNameItem extends AbstractItem implements ExportFieldNameItemInt
     /**
      * @param MetadataItemInterface $metadata
      */
-    public function setFieldMetadata(MetadataItemInterface $metadata)
+    public function setMetadataItem(MetadataItemInterface $metadata)
     {
         $this->_metadataItem = $metadata;
     }
@@ -81,7 +81,7 @@ class ExportFieldNameItem extends AbstractItem implements ExportFieldNameItemInt
     /**
      * @return MetadataItemInterface
      */
-    public function getFieldMetadata()
+    public function getMetadataItem()
     {
         return $this->_metadataItem;
     }

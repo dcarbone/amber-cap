@@ -108,7 +108,6 @@ class ExportFieldNamesCollection extends AbstractItemCollection
     public function buildAndAppendItem(array $itemData)
     {
         $item = ExportFieldNameItem::createFromArray($itemData);
-        $this[$item['export_field_name']] = $item;
 
         if (null === $item['choice_value'] || '' === $item['choice_value'])
         {
@@ -121,5 +120,7 @@ class ExportFieldNamesCollection extends AbstractItemCollection
 
             $this->_originalToExportNameMap[$item['original_field_name']][$item['choice_value']] = $item['export_field_name'];
         }
+
+        $this[$item['export_field_name']] = $item;
     }
 }

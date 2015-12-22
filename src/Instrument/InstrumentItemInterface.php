@@ -19,6 +19,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\FormEventMapping\FormEventMappingItemInterface;
 use DCarbone\AmberHat\ItemInterface;
 use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 
@@ -41,10 +42,20 @@ interface InstrumentItemInterface extends ItemInterface
     /**
      * @param MetadataItemInterface $metadata
      */
-    public function addFieldMetadata(MetadataItemInterface $metadata);
+    public function addMetadataItem(MetadataItemInterface $metadata);
 
     /**
      * @return MetadataItemInterface[]
      */
-    public function getFieldMetadata();
+    public function getMetadataItems();
+
+    /**
+     * @param FormEventMappingItemInterface $formEventMappingItem
+     */
+    public function addFormEventMappingItem(FormEventMappingItemInterface $formEventMappingItem);
+
+    /**
+     * @return FormEventMappingItemInterface[]
+     */
+    public function getFormEventMappingItems();
 }

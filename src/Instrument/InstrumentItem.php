@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\AbstractItem;
+use DCarbone\AmberHat\FormEventMapping\FormEventMappingItemInterface;
 use DCarbone\AmberHat\Metadata\MetadataItemInterface;
 
 /**
@@ -35,7 +36,10 @@ class InstrumentItem extends AbstractItem implements InstrumentItemInterface
     );
 
     /** @var MetadataItemInterface[] */
-    private $_fieldMetadata = array();
+    private $_metadataItems = array();
+
+    /** @var FormEventMappingItemInterface[] */
+    private $_formEventMappingItems = array();
 
     /**
      * @return string
@@ -64,13 +68,32 @@ class InstrumentItem extends AbstractItem implements InstrumentItemInterface
     /**
      * @param MetadataItemInterface $metadata
      */
-    public function addFieldMetadata(MetadataItemInterface $metadata)
+    public function addMetadataItem(MetadataItemInterface $metadata)
     {
-        $this->_fieldMetadata[$metadata['field_name']] = $metadata;
+        $this->_metadataItems[$metadata['field_name']] = $metadata;
     }
 
-    public function getFieldMetadata()
+    /**
+     * @return \DCarbone\AmberHat\Metadata\MetadataItemInterface[]
+     */
+    public function getMetadataItems()
     {
-        return $this->_fieldMetadata;
+        return $this->_metadataItems;
+    }
+
+    /**
+     * @param FormEventMappingItemInterface $formEventMappingItem
+     */
+    public function addFormEventMappingItem(FormEventMappingItemInterface $formEventMappingItem)
+    {
+        $this->_formEventMappingItems[] = $formEventMappingItem;
+    }
+
+    /**
+     * @return \DCarbone\AmberHat\FormEventMapping\FormEventMappingItemInterface[]
+     */
+    public function getFormEventMappingItems()
+    {
+        return $this->_formEventMappingItems;
     }
 }

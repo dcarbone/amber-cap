@@ -20,6 +20,9 @@
  */
 
 use DCarbone\AmberHat\AbstractItemCollection;
+use DCarbone\AmberHat\Arm\ArmsCollection;
+use DCarbone\AmberHat\Event\EventsCollection;
+use DCarbone\AmberHat\Instrument\InstrumentsCollection;
 use DCarbone\AmberHat\ItemInterface;
 
 /**
@@ -28,42 +31,60 @@ use DCarbone\AmberHat\ItemInterface;
  */
 class FormEventMappingsCollection extends AbstractItemCollection
 {
+    /** @var ArmsCollection|null */
+    private $_armsCollection;
+    /** @var EventsCollection|null */
+    private $_eventsCollection;
+    /** @var InstrumentsCollection|null */
+    private $_instrumentsCollection;
+
     /**
-     * @param string $xml
-     * @return FormEventMappingsCollection
+     * Constructor
+     *
+     * @param ArmsCollection|null $armsCollection
+     * @param EventsCollection|null $eventsCollection
+     * @param InstrumentsCollection|null $instrumentsCollection
      */
-    public static function createFromXMLString($xml)
+    public function __construct(ArmsCollection $armsCollection = null,
+                                EventsCollection $eventsCollection = null,
+                                InstrumentsCollection $instrumentsCollection = null)
     {
-        return self::processXMLString($xml, '\\DCarbone\\AmberHat\\FormEventMapping\\FormEventMappingItem');
+        $this->_armsCollection = $armsCollection;
+        $this->_eventsCollection = $eventsCollection;
+        $this->_instrumentsCollection = $instrumentsCollection;
     }
 
     /**
-     * @param string $file
-     * @return FormEventMappingsCollection
+     * @param array $itemData
      */
-    public static function createFromXMLFile($file)
+    public function buildAndAppendItem(array $itemData)
     {
-        return self::processXMLFile($file, '\\DCarbone\\AmberHat\\FormEventMapping\\FormEventMappingItem');
-    }
+        $item = FormEventMappingItem::createFromArray($itemData);
 
-    /**
-     * @param AbstractItemCollection $collection
-     * @param ItemInterface $item
-     * @param string $keyProperty
-     */
-    public static function addItemToCollection(AbstractItemCollection $collection,
-                                               ItemInterface $item,
-                                               $keyProperty)
-    {
-        if ($collection instanceof self)
+        if (isset($this->_armsCollection) && isset($this->_armsCollection[$item['arm_num']]))
         {
-            $collection[sprintf('%s:%s', $item['form'], $item['unique_event_name'])] = $item;
+            /** @var \DCarbone\AmberHat\Arm\ArmItemInterface $arm */
+            $arm = $this->_armsCollection[$item['arm_num']];
+            $arm->addFormEventMappingItem($item);
+            $item->setArmItem($arm);
         }
-        else
+
+        if (isset($this->_eventsCollection) && isset($this->_eventsCollection[$item['unique_event_name']]))
         {
-            throw new \BadMethodCallException(
-                'Cannot utilize overloaded static method "addItemToCollection" on on class "FormEventMappingsCollection" with different collection class.'
-            );
+            /** @var \DCarbone\AmberHat\Event\EventItemInterface $event */
+            $event = $this->_eventsCollection[$item['unique_event_name']];
+            $event->addFormEventMappingItem($item);
+            $item->setEventItem($event);
         }
+
+        if (isset($this->_instrumentsCollection) && isset($this->_instrumentsCollection[$item['form']]))
+        {
+            /** @var \DCarbone\AmberHat\Instrument\InstrumentItemInterface $instrument */
+            $instrument = $this->_instrumentsCollection[$item['form']];
+            $instrument->addFormEventMappingItem($item);
+            $item->setInstrumentItem($instrument);
+        }
+
+        $this[sprintf('%s:%s', $item['form'], $item['unique_event_name'])] = $item;
     }
 }

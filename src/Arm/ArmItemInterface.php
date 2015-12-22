@@ -20,6 +20,7 @@
  */
 
 use DCarbone\AmberHat\Event\EventItemInterface;
+use DCarbone\AmberHat\FormEventMapping\FormEventMappingItemInterface;
 use DCarbone\AmberHat\ItemInterface;
 
 /**
@@ -41,10 +42,20 @@ interface ArmItemInterface extends ItemInterface
     /**
      * @param EventItemInterface $eventItem
      */
-    public function addEvent(EventItemInterface $eventItem);
+    public function addEventItem(EventItemInterface $eventItem);
 
     /**
      * @return EventItemInterface[]
      */
-    public function getEvents();
+    public function getEventItems();
+
+    /**
+     * @param FormEventMappingItemInterface $formEventMapping
+     */
+    public function addFormEventMappingItem(FormEventMappingItemInterface $formEventMapping);
+
+    /**
+     * @return FormEventMappingItemInterface[]
+     */
+    public function getFormEventMappingItems();
 }

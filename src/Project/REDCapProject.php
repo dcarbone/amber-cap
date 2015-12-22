@@ -22,6 +22,10 @@
 use DCarbone\AmberHat\AmberHatClient;
 use DCarbone\AmberHat\Arm\ArmsCollection;
 use DCarbone\AmberHat\Event\EventsCollection;
+use DCarbone\AmberHat\ExportFieldName\ExportFieldNamesCollection;
+use DCarbone\AmberHat\FormEventMapping\FormEventMappingsCollection;
+use DCarbone\AmberHat\Information\ProjectInformation;
+use DCarbone\AmberHat\Instrument\InstrumentsCollection;
 use DCarbone\AmberHat\Metadata\MetadataCollection;
 use DCarbone\AmberHat\Utilities\ParserUtility;
 
@@ -33,6 +37,8 @@ class REDCapProject
 {
     /** @var AmberHatClient */
     private $_client;
+
+    private $_buildRelationships;
 
     /** @var \DCarbone\AmberHat\Arm\ArmsCollection */
     private $_arms = null;
@@ -50,7 +56,7 @@ class REDCapProject
     private $_formEventMapping = null;
 
     /** @var array */
-    private $_formNames = null;
+    private $_instrumentNames = null;
 
     /**
      * Constructor
@@ -58,11 +64,17 @@ class REDCapProject
      * @param string $redcapApiEndpoint
      * @param string $token
      * @param string $tempDirectory
+     * @param bool $buildRelationships
      * @param bool|false $saveTempFiles
      */
-    public function __construct($redcapApiEndpoint, $token, $tempDirectory, $saveTempFiles = false)
+    public function __construct($redcapApiEndpoint,
+                                $token,
+                                $tempDirectory,
+                                $buildRelationships = false,
+                                $saveTempFiles = false)
     {
         $this->_client = new AmberHatClient($redcapApiEndpoint, $token, $tempDirectory, $saveTempFiles);
+        $this->_buildRelationships = $buildRelationships;
     }
 
     /**
@@ -81,7 +93,7 @@ class REDCapProject
         if (!isset($this->_arms))
         {
             $this->_arms = new ArmsCollection();
-            ParserUtility::parseMetadataJsonResponse(
+            ParserUtility::populateMetadataCollection(
                 $this->_client->exportArms(array(), 'json'),
                 $this->_arms
             );
@@ -91,19 +103,18 @@ class REDCapProject
     }
 
     /**
-     * @param bool $includeRelationships
      * @return EventsCollection
      */
-    public function getEvents($includeRelationships = false)
+    public function getEvents()
     {
         if (!isset($this->_events))
         {
-            if ($includeRelationships)
+            if ($this->_buildRelationships)
                 $this->_events = new EventsCollection($this->getArms());
             else
                 $this->_events = new EventsCollection();
 
-            ParserUtility::parseMetadataJsonResponse(
+            ParserUtility::populateMetadataCollection(
                 $this->_client->exportEvents(array(), 'json'),
                 $this->_events
             );
@@ -113,16 +124,21 @@ class REDCapProject
     }
 
     /**
-     * @param bool $includeRelationships
      * @return \DCarbone\AmberHat\Metadata\MetadataCollection
      */
-    public function getMetadata($includeRelationships = false)
+    public function getMetadata()
     {
         if (!isset($this->_metadata))
         {
-            if ($includeRelationships)
-                $this->_metadata = new MetadataCollection()
-            $this->_metadata = $this->_client->exportMetadata();
+            if ($this->_buildRelationships)
+                $this->_metadata = new MetadataCollection($this->getExportFieldNames(), $this->getInstruments());
+            else
+                $this->_metadata = new MetadataCollection();
+
+            ParserUtility::populateMetadataCollection(
+                $this->_client->exportMetadata(array(), array(), 'json'),
+                $this->_metadata
+            );
         }
 
         return $this->_metadata;
@@ -134,7 +150,14 @@ class REDCapProject
     public function getInstruments()
     {
         if (!isset($this->_instruments))
-            $this->_instruments = $this->_client->exportInstruments();
+        {
+            $this->_instruments = new InstrumentsCollection();
+
+            ParserUtility::populateMetadataCollection(
+                $this->_client->exportInstruments('json'),
+                $this->_instruments
+            );
+        }
 
         return $this->_instruments;
     }
@@ -145,48 +168,91 @@ class REDCapProject
     public function getExportFieldNames()
     {
         if (!isset($this->_exportFieldNames))
-            $this->_exportFieldNames = $this->_client->exportExportFieldNames();
+        {
+            $this->_exportFieldNames = new ExportFieldNamesCollection();
+
+            ParserUtility::populateMetadataCollection(
+                $this->_client->exportExportFieldNames('json'),
+                $this->_exportFieldNames
+            );
+        }
 
         return $this->_exportFieldNames;
     }
 
     /**
-     * @return \DCarbone\AmberHat\Information\ProjectInformation
-     */
-    public function getInformation()
-    {
-        if (!isset($this->_information))
-            $this->_information = $this->_client->exportProjectInformation();
-
-        return $this->_information;
-    }
-
-    /**
-     * @return \DCarbone\AmberHat\FormEventMapping\FormEventMappingsCollection
+     * @return FormEventMappingsCollection
      */
     public function getFormEventMapping()
     {
         if (!isset($this->_formEventMapping))
-            $this->_formEventMapping = $this->_client->exportFormEventMappings();
+        {
+            if ($this->_buildRelationships)
+            {
+                $this->_formEventMapping= new FormEventMappingsCollection(
+                    $this->getArms(),
+                    $this->getEvents(),
+                    $this->getInstruments()
+                );
+            }
+            else
+            {
+                $this->_formEventMapping = new FormEventMappingsCollection();
+            }
+
+            ParserUtility::populateMetadataCollection(
+                $this->_client->exportFormEventMappings('json'),
+                $this->_formEventMapping
+            );
+        }
 
         return $this->_formEventMapping;
     }
 
     /**
+     * @return ProjectInformation
+     */
+    public function getInformation()
+    {
+        if (!isset($this->_information))
+        {
+            $this->_information = ProjectInformation::createFromArray(
+                ParserUtility::parseJsonResponse(
+                    $this->_client->exportProjectInformation('json')
+                )
+            );
+        }
+
+        return $this->_information;
+    }
+
+
+
+    /**
+     * @return array
+     */
+    public function getInstrumentNames()
+    {
+        if (!isset($this->_instrumentNames))
+        {
+            $this->_instrumentNames = array();
+            /** @var \DCarbone\AmberHat\Instrument\InstrumentItemInterface $instrument */
+            foreach($this->getInstruments() as $instrument)
+            {
+                $this->_instrumentNames[] = $instrument->getInstrumentName();
+            }
+        }
+
+        return $this->_instrumentNames;
+    }
+
+    /**
+     * @see getInstrumentNames()
+     *
      * @return array
      */
     public function getFormNames()
     {
-        if (!isset($this->_formNames))
-        {
-            $this->_formNames = array();
-            /** @var \DCarbone\AmberHat\Instrument\InstrumentItemInterface $instrument */
-            foreach($this->getInstruments() as $instrument)
-            {
-                $this->_formNames[] = $instrument->getInstrumentName();
-            }
-        }
-
-        return $this->_formNames;
+        return $this->getInstrumentNames();
     }
 }

@@ -51,8 +51,8 @@ class EventsCollection extends AbstractItemCollection
         {
             /** @var \DCarbone\AmberHat\Arm\ArmItemInterface $arm */
             $arm = $this->_armsCollection[$item['arm_num']];
-            $arm->addEvent($item);
-            $item->setArm($arm);
+            $arm->addEventItem($item);
+            $item->setArmItem($arm);
         }
         $this[$item['unique_event_name']] = $item;
     }

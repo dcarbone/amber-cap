@@ -19,6 +19,9 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\Arm\ArmItemInterface;
+use DCarbone\AmberHat\Event\EventItemInterface;
+use DCarbone\AmberHat\Instrument\InstrumentItemInterface;
 use DCarbone\AmberHat\ItemInterface;
 
 /**
@@ -41,4 +44,41 @@ interface FormEventMappingItemInterface extends ItemInterface
      * @return string
      */
     public function getForm();
+
+    /**
+     * @param ArmItemInterface $arm
+     */
+    public function setArmItem(ArmItemInterface $arm);
+
+    /**
+     * @return ArmItemInterface
+     */
+    public function getArmItem();
+
+    /**
+     * @param EventItemInterface $event
+     */
+    public function setEventItem(EventItemInterface $event);
+
+    /**
+     * @return EventItemInterface
+     */
+    public function getEventItem();
+
+    /**
+     * @param InstrumentItemInterface $instrument
+     */
+    public function setInstrumentItem(InstrumentItemInterface $instrument);
+
+    /**
+     * @return InstrumentItemInterface
+     */
+    public function getInstrumentItem();
+
+    /**
+     * @see getInstrumentItem()
+     *
+     * @return InstrumentItemInterface
+     */
+    public function getFormItem();
 }

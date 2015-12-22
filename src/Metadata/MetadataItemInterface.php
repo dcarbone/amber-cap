@@ -19,6 +19,8 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\ExportFieldName\ExportFieldNameItemInterface;
+use DCarbone\AmberHat\Instrument\InstrumentItemInterface;
 use DCarbone\AmberHat\ItemInterface;
 
 /**
@@ -131,11 +133,6 @@ interface MetadataItemInterface extends ItemInterface
     /**
      * @return array
      */
-    public function getExportFieldNames();
-
-    /**
-     * @return array
-     */
     public function getFieldChoiceArray();
 
     /**
@@ -143,4 +140,31 @@ interface MetadataItemInterface extends ItemInterface
      * @return null|string
      */
     public function getChoiceValueByExportFieldName($exportFieldName);
+
+    /**
+     * @param ExportFieldNameItemInterface $exportFieldName
+     */
+    public function addExportFieldNameItem(ExportFieldNameItemInterface $exportFieldName);
+
+    /**
+     * @return ExportFieldNameItemInterface[]
+     */
+    public function getExportFieldNameItems();
+
+    /**
+     * @param InstrumentItemInterface $instrument
+     */
+    public function setInstrumentItem(InstrumentItemInterface $instrument);
+
+    /**
+     * @return InstrumentItemInterface
+     */
+    public function getInstrumentItem();
+
+    /**
+     * @see getInstrumentItem()
+     *
+     * @return InstrumentItemInterface
+     */
+    public function getFormItem();
 }

@@ -59,20 +59,6 @@ class ProjectInformation extends AbstractItem implements ProjectInformationInter
     private $_productionTimeDateTime = null;
 
     /**
-     * @param $xml
-     * @return \DCarbone\AmberHat\Information\ProjectInformationInterface
-     */
-    public static function createWithXMLString($xml)
-    {
-        $sxe = new \SimpleXMLElement($xml, LIBXML_COMPACT | LIBXML_NOBLANKS);
-
-        if ($sxe instanceof \SimpleXMLElement)
-            return parent::createFromSXE($sxe);
-
-        throw new \InvalidArgumentException('Unable to parse provided XML string.');
-    }
-
-    /**
      * @return string
      */
     public function __toString()

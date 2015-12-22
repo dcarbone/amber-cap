@@ -16,8 +16,21 @@ abstract class ParserUtility
      * @param AbstractItemCollection $collection
      * @throws REDCapApiException
      */
-    public static function parseMetadataJsonResponse(CurlPlusResponseInterface $response,
-                                                     AbstractItemCollection $collection)
+    public static function populateMetadataCollection(CurlPlusResponseInterface $response,
+                                                      AbstractItemCollection $collection)
+    {
+        foreach(static::parseJsonResponse($response) as $item)
+        {
+            $collection->buildAndAppendItem($item);
+        }
+    }
+
+    /**
+     * @param CurlPlusResponseInterface $response
+     * @return array
+     * @throws REDCapApiException
+     */
+    public static function parseJsonResponse(CurlPlusResponseInterface $response)
     {
         $data = json_decode((string)$response, true);
         $error = json_last_error();
@@ -26,18 +39,12 @@ abstract class ParserUtility
             if (count($data) === 1 && isset($data['error']))
                 throw new REDCapApiException($data['error'], 500);
 
-            foreach($data as $item)
-            {
-                $collection->buildAndAppendItem($item);
-            }
+            return $data;
         }
-        else
-        {
-            throw new \DomainException(sprintf(
-                '%s - Invalid JSON response seen.  Error: "%s"',
-                get_class($collection),
-                JsonErrorHelper::invoke(true, $error)
-            ));
-        }
+
+        throw new \DomainException(sprintf(
+            'Invalid JSON response seen.  Error: "%s"',
+            JsonErrorHelper::invoke(true, $error)
+        ));
     }
 }

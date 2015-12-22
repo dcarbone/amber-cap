@@ -22,7 +22,6 @@
 use DCarbone\AmberHat\AbstractItemCollection;
 use DCarbone\AmberHat\ExportFieldName\ExportFieldNamesCollection;
 use DCarbone\AmberHat\Instrument\InstrumentsCollection;
-use DCarbone\AmberHat\ItemInterface;
 
 /**
  * Class MetadataCollection
@@ -48,20 +47,34 @@ class MetadataCollection extends AbstractItemCollection
         $this->_instruments = $instruments;
     }
 
+    /**
+     * @param array $itemData
+     */
     public function buildAndAppendItem(array $itemData)
     {
         $item = MetadataItem::createFromArray($itemData);
-//        if (isset($this->_exportFieldNames) && )
+
+        if (isset($this->_exportFieldNames))
+        {
+            $exportFieldNames = $this->_exportFieldNames->getExportFieldsForMetadataItem($item);
+            if ($exportFieldNames)
+            {
+                foreach($exportFieldNames as $exportFieldName)
+                {
+                    $item->addExportFieldNameItem($exportFieldName);
+                    $exportFieldName->setMetadataItem($item);
+                }
+            }
+        }
+
+        if (isset($this->_instruments) && isset($this->_instruments[$item['form_name']]))
+        {
+            /** @var \DCarbone\AmberHat\Instrument\InstrumentItemInterface $instrument */
+            $instrument = $this->_instruments[$item['form_name']];
+            $item->setInstrumentItem($instrument);
+            $instrument->addMetadataItem($item);
+        }
 
         $this[sprintf('%s:%s', $item['form_name'], $item['field_name'])] = $item;
-    }
-
-    /**
-     * @param ItemInterface $item
-     * @param string $keyProperty
-     */
-    protected function addItem(ItemInterface $item, $keyProperty)
-    {
-
     }
 }

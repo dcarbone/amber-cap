@@ -20,6 +20,9 @@
  */
 
 use DCarbone\AmberHat\AbstractItem;
+use DCarbone\AmberHat\Arm\ArmItemInterface;
+use DCarbone\AmberHat\Event\EventItemInterface;
+use DCarbone\AmberHat\Instrument\InstrumentItemInterface;
 
 /**
  * Class FormEventMappingItem
@@ -33,6 +36,13 @@ class FormEventMappingItem extends AbstractItem implements FormEventMappingItemI
         'unique_event_name' => null,
         'form' => null
     );
+
+    /** @var ArmItemInterface */
+    private $_armItem = null;
+    /** @var EventItemInterface */
+    private $_eventItem = null;
+    /** @var InstrumentItemInterface */
+    private $_instrumentItem = null;
 
     /**
      * @return string
@@ -64,5 +74,63 @@ class FormEventMappingItem extends AbstractItem implements FormEventMappingItemI
     public function __toString()
     {
         return sprintf('%s:%s', $this->properties['form'], $this->properties['unique_event_name']);
+    }
+
+    /**
+     * @param ArmItemInterface $arm
+     */
+    public function setArmItem(ArmItemInterface $arm)
+    {
+        $this->_armItem = $arm;
+    }
+
+    /**
+     * @return ArmItemInterface
+     */
+    public function getArmItem()
+    {
+        return $this->_armItem;
+    }
+
+    /**
+     * @param EventItemInterface $event
+     */
+    public function setEventItem(EventItemInterface $event)
+    {
+        $this->_eventItem = $event;
+    }
+
+    /**
+     * @return EventItemInterface
+     */
+    public function getEventItem()
+    {
+        return $this->_eventItem;
+    }
+
+    /**
+     * @param InstrumentItemInterface $instrument
+     */
+    public function setInstrumentItem(InstrumentItemInterface $instrument)
+    {
+        $this->_instrumentItem = $instrument;
+    }
+
+    /**
+     * @return InstrumentItemInterface
+     */
+    public function getInstrumentItem()
+    {
+        return $this->_instrumentItem;
+    }
+
+    /**
+     * @see getInstrumentItem()
+     *
+     * @return InstrumentItemInterface
+     */
+    public function getFormItem()
+    {
+        return $this->getInstrumentItem();
     }
 }

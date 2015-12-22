@@ -21,6 +21,7 @@
 
 use DCarbone\AmberHat\AbstractItem;
 use DCarbone\AmberHat\Arm\ArmItemInterface;
+use DCarbone\AmberHat\FormEventMapping\FormEventMappingItemInterface;
 
 /**
  * Class EventItem
@@ -39,7 +40,10 @@ class EventItem extends AbstractItem implements EventItemInterface
     );
 
     /** @var ArmItemInterface */
-    private $_arm;
+    private $_armItem = null;
+
+    /** @var FormEventMappingItemInterface[] */
+    private $_formEventMappings = array();
 
     /**
      * @return string
@@ -100,16 +104,32 @@ class EventItem extends AbstractItem implements EventItemInterface
     /**
      * @param ArmItemInterface $arm
      */
-    public function setArm(ArmItemInterface $arm)
+    public function setArmItem(ArmItemInterface $arm)
     {
-        $this->_arm = $arm;
+        $this->_armItem = $arm;
     }
 
     /**
      * @return ArmItemInterface
      */
-    public function getArm()
+    public function getArmItem()
     {
-        return $this->_arm;
+        return $this->_armItem;
+    }
+
+    /**
+     * @param FormEventMappingItemInterface $formEventMapping
+     */
+    public function addFormEventMappingItem(FormEventMappingItemInterface $formEventMapping)
+    {
+        $this->_formEventMappings[] = $formEventMapping;
+    }
+
+    /**
+     * @return \DCarbone\AmberHat\FormEventMapping\FormEventMappingItemInterface[]
+     */
+    public function getFormEventMappings()
+    {
+        return $this->_formEventMappings;
     }
 }

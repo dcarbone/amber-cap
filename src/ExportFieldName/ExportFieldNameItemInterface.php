@@ -45,10 +45,10 @@ interface ExportFieldNameItemInterface extends ItemInterface
     /**
      * @param MetadataItemInterface $metadata
      */
-    public function setFieldMetadata(MetadataItemInterface $metadata);
+    public function setMetadataItem(MetadataItemInterface $metadata);
 
     /**
      * @return MetadataItemInterface
      */
-    public function getFieldMetadata();
+    public function getMetadataItem();
 }
