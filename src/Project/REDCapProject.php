@@ -28,7 +28,11 @@ use DCarbone\AmberHat\Information\ProjectInformation;
 use DCarbone\AmberHat\Instrument\InstrumentItemInterface;
 use DCarbone\AmberHat\Instrument\InstrumentsCollection;
 use DCarbone\AmberHat\Metadata\MetadataCollection;
+use DCarbone\AmberHat\Record\RecordFieldFile;
+use DCarbone\AmberHat\Record\RecordFieldInterface;
 use DCarbone\AmberHat\Record\RecordParser;
+use DCarbone\AmberHat\User\UsersCollection;
+use DCarbone\AmberHat\Utilities\FileUtility;
 use DCarbone\AmberHat\Utilities\ParserUtility;
 
 /**
@@ -40,6 +44,7 @@ class REDCapProject
     /** @var AmberHatClient */
     private $_client;
 
+    /** @var bool */
     private $_buildRelationships;
 
     /** @var \DCarbone\AmberHat\Arm\ArmsCollection */
@@ -56,6 +61,8 @@ class REDCapProject
     private $_information = null;
     /** @var \DCarbone\AmberHat\FormEventMapping\FormEventMappingsCollection */
     private $_formEventMapping = null;
+    /** @var \DCarbone\AmberHat\User\UsersCollection */
+    private $_users = null;
 
     /** @var array */
     private $_instrumentNames = null;
@@ -229,6 +236,24 @@ class REDCapProject
     }
 
     /**
+     * @return UsersCollection
+     */
+    public function getUsers()
+    {
+        if (!isset($this->_users))
+        {
+            $this->_users = new UsersCollection();
+
+            ParserUtility::populateMetadataCollection(
+                $this->_client->exportUsers('json'),
+                $this->_users
+            );
+        }
+
+        return $this->_users;
+    }
+
+    /**
      * @return array
      */
     public function getInstrumentNames()
@@ -270,5 +295,57 @@ class REDCapProject
             $instrument,
             $this->getMetadata()
         );
+    }
+
+    /**
+     * @param RecordFieldInterface $recordField
+     * @param string|null $outputDir
+     * @return \DCarbone\AmberHat\Record\RecordFieldFileInterface
+     */
+    public function downloadFile(RecordFieldInterface $recordField, $outputDir = null)
+    {
+        $tmpFilename = $this->_client->exportFile($recordField, $outputDir);
+
+        list($headers, $byteOffset) = FileUtility::extractHeadersFromFile($tmpFilename);
+
+        if (null === $headers)
+        {
+            trigger_error(
+                sprintf(
+                    '%s::getFile - Unable to parse headers from response, this could be cause either by a malformed response or improper CURLOPT specification.  Form Name: %s, Field Name: %s, Record ID: %s',
+                    get_class($this),
+                    $recordField->instrumentName,
+                    $recordField->fieldName,
+                    $recordField->recordID
+                ),
+                E_USER_WARNING
+            );
+
+            return $tmpFilename;
+        }
+
+        $headers = end($headers);
+        if (isset($headers['Content-Type']))
+        {
+            preg_match('{name=["\']([^"\']+)["\']}S', $headers['Content-Type'], $filename);
+
+            if (count($filename) === 2)
+            {
+                $file = FileUtility::removeHeadersAndMoveFile($tmpFilename, $byteOffset, $outputDir, $filename[1]);
+
+                return new RecordFieldFile(
+                    $file,
+                    trim(substr($headers['Content-Type'], 0, strlen($headers['Content-Type']) - strlen($filename[0])), " ;")
+                );
+            }
+        }
+
+        throw new \RuntimeException(sprintf(
+            '%s::downloadFile - Unable to determine filename from response headers.  Form: %s, Field Name: %s, Record ID: %s',
+            get_class($this),
+            $recordField->instrumentName,
+            $recordField->fieldName,
+            $recordField->recordID
+        ));
     }
 }

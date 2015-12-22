@@ -23,7 +23,6 @@ use DCarbone\AmberHat\AbstractItemCollection;
 use DCarbone\AmberHat\Arm\ArmsCollection;
 use DCarbone\AmberHat\Event\EventsCollection;
 use DCarbone\AmberHat\Instrument\InstrumentsCollection;
-use DCarbone\AmberHat\ItemInterface;
 
 /**
  * Class FormEventMappingsCollection

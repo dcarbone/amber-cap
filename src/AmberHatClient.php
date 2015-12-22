@@ -255,7 +255,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
             ));
         }
 
-        $tmpFilename = $this->_executeRequest(
+        return $this->_executeRequest(
             'file',
             array(
                 'action' => 'export',
@@ -273,47 +273,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
             false
         );
 
-        list($headers, $byteOffset) = FileUtility::extractHeadersFromFile($tmpFilename);
 
-        if (null === $headers)
-        {
-            trigger_error(
-                sprintf(
-                    '%s::getFile - Unable to parse headers from response, this could be cause either by a malformed response or improper CURLOPT specification.  Form Name: %s, Field Name: %s, Record ID: %s',
-                    get_class($this),
-                    $recordField->instrumentName,
-                    $recordField->fieldName,
-                    $recordField->recordID
-                ),
-                E_USER_WARNING
-            );
-
-            return $tmpFilename;
-        }
-
-        $headers = end($headers);
-        if (isset($headers['Content-Type']))
-        {
-            preg_match('{name=["\']([^"\']+)["\']}S', $headers['Content-Type'], $filename);
-
-            if (count($filename) === 2)
-            {
-                $file = FileUtility::removeHeadersAndMoveFile($tmpFilename, $byteOffset, $outputDir, $filename[1]);
-
-                return new RecordFieldFile(
-                    $file,
-                    trim(substr($headers['Content-Type'], 0, strlen($headers['Content-Type']) - strlen($filename[0])), " ;")
-                );
-            }
-        }
-
-        throw new \RuntimeException(sprintf(
-            '%s::getFile - Unable to determine filename from response headers.  Form: %s, Field Name: %s, Record ID: %s',
-            get_class($this),
-            $recordField->instrumentName,
-            $recordField->fieldName,
-            $recordField->recordID
-        ));
     }
 
     /**
