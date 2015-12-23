@@ -2,7 +2,7 @@
 
 ## Method
 ```php
-$instruments = $client->getInstruments();
+$instruments = $project->getInstruments();
 ```
 
 ## Response Classes
@@ -13,7 +13,7 @@ containing 1+ [InstrumentItemInterface](../src/Instrument/InstrumentItemInterfac
 ## Example Usage
 
 ```php
-foreach($client->getInstruments() as $instrument)
+foreach($project->getInstruments() as $instrument)
 {
     echo <<<STRING
 Instrument Name: {$instrument->getInstrumentName()}

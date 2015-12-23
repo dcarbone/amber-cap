@@ -10,8 +10,7 @@ This lib requires the use of [Composer](https://getcomposer.org/).
     "dcarbone/amber-hat": "0.4.*"
 }
 ```
-
-## Client Creation
+## Project Client Creation
 
 To get started, you will need 3 things:
 
@@ -22,13 +21,24 @@ To get started, you will need 3 things:
 Once you have those, you can immediately start exporting data for the project the token gives you access to:
 
 ```php
-use DCarbone\AmberHat\AmberHatClient;
+use DCarbone\AmberHat\Project\REDCapProject;
 
-$client = new AmberHatClient(
+$project = new REDCapProject(
     'https://redcap.mygreatinstitution.edu/api/',
     'mygreattoken',
     'my-cache-dir');  
 ```
+
+Have a look at the source of [REDCapProject](src/Project/REDCapProject.php) to learn more about what it does.
+
+### Relationship Building
+
+Many of the available REDCap metadata endpoints have relationships to each other (Events have a many-to-one 
+relationship with Arms, for example) that, by default, are not constructed when exporting metadata.  If you wish to
+have related metadata objects built with a relationship to their relations, pass in `true` as the 4th argument
+when creating the project client.
+
+For more information on relationships and how they are built, see [RELATIONS.md](documentation/RELATIONS.md).
 
 ## Available Data Export methods:
 
@@ -47,8 +57,8 @@ $client = new AmberHatClient(
 ### Basic Export Data Object Structure
 
 With the exception of
-[Records](documentation/RECORDS.md),
 [Project Information](documentation/PROJECTINFORMATION.md),
+[Records](documentation/RECORDS.md),
 and [Record Field File](documentation/FILE.md),
 all export methods return a collection class which extends
 [AbstractItemCollection](src/AbstractItemCollection.php).  This collection class

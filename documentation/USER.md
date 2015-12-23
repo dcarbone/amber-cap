@@ -2,7 +2,7 @@
 
 ## Method
 ```php
-$users = $client->getUsers();
+$users = $project->getUsers();
 ```
 
 ## Response Classes
@@ -15,7 +15,7 @@ Response will be of type [UsersCollection](../src/User/UsersCollection.php) cont
 ```php
 echo '<pre>';
 
-foreach($client->getUsers() as $user)
+foreach($project->getUsers() as $user)
 {
     echo <<<STRING
 Username: {$user->getUsername()}

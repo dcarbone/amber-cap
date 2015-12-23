@@ -64,13 +64,13 @@ that belong to a single Record ID.  The object will be an instance of
 use DCarbone\AmberHat\AmberHatClient;
 
 // Initialize new client
-$client = new AmberHatClient(
+$project = new AmberHatClient(
     'https://redcap.mygreatinstitution.edu/api/',
     'mygreattoken',
     'my-cache-dir'); 
 
 // Get Metadata
-$metadata = $client->getMetadata();
+$metadata = $project->getMetadata();
 
 // Get a unique array of all form names
 $formNames = array();
@@ -91,7 +91,7 @@ foreach($formNames as $formName)
     // for the form you specified.  The response will be cached in the Temp directory
     // you specified during client creation.  It will then be looped through using
     // XML Parser.
-    $recordParser = $client->getRecords($formName, array(), array(), $metadata);
+    $recordParser = $project->getRecords($formName, array(), array(), $metadata);
     
     // Default is to read and return each field
     while ($field = $recordParser->read())

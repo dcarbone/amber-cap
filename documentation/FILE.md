@@ -7,7 +7,7 @@ field containing the file you wish to export.
 
 Once you have retrieved the record field you wish to export the file for, execute
 ```php
-$file = $client->getFile($field, __DIR__);
+$file = $project->downloadFile($field, __DIR__);
 ```
 
 The first argument is required and must be an instance of
@@ -25,7 +25,7 @@ OR an instance of [RecordFieldFileInterface](../src/Record/RecordFieldFileInterf
 
 ```php
 
-$recordParser = $client->getRecords($formName, array(), array(), $metadata);
+$recordParser = $project->getRecords($formName, array(), array(), $metadata);
 
 while ($field = $recordParser->read())
 {
@@ -38,7 +38,7 @@ Field Value: {$field->fieldValue}
 
 STRING;
 
-        $file = $client->getFile($field, __DIR__);
+        $file = $project->downloadFile($field, __DIR__);
 
         echo <<<STRING
 Base File Name: {$file->basename}

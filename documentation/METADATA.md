@@ -2,11 +2,8 @@
 
 ## Method
 ```php
-$metadata = $client->getMetadata();
+$metadata = $project->getMetadata();
 ```
-
-You may optionally pass in an array of form names and/or an array of field names if you only wish to 
-receive metadata about those specific ones.
 
 ## Response
 
@@ -18,7 +15,7 @@ Response will be of type [MetadataCollection](../src/Metadata/MetadataCollection
 ```php
 echo '<pre>';
 /** @var \DCarbone\AmberHat\Metadata\MetadataItemInterface $metadataItem **/
-foreach($client->getMetadata() as $metadataItem)
+foreach($project->getMetadata() as $metadataItem)
 {
     echo <<<STRING
 Field Name: {$metadataItem['field_name']}

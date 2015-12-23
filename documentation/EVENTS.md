@@ -2,11 +2,8 @@
 
 ## Method
 ```php
-$events = $client->getEvents();
+$events = $project->getEvents();
 ```
-
-You may optionally pass in an array of known Event Numbers if you only wish to receive data
-about a few specific ones.
 
 ## Response
 
@@ -17,7 +14,7 @@ Response will be of type [EventsCollection](../src/Event/EventsCollection.php), 
 
 ```php
 echo '<pre>';
-foreach($client->getEvents() as $eventItem)
+foreach($project->getEvents() as $eventItem)
 {
     echo <<<STRING
 Event Name: {$eventItem['event_name']}

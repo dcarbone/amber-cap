@@ -2,7 +2,7 @@
 
 ## Method
 ```php
-$projectInfo = $client->getProjectInformation();
+$projectInfo = $project->getProjectInformation();
 ```
 
 Response will be of type 

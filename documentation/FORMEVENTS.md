@@ -2,7 +2,7 @@
 
 ## Method
 ```php
-$formEvents = $client->getFormEventMappings();
+$formEvents = $project->getFormEventMappings();
 ```
 
 ## Response
@@ -14,7 +14,7 @@ Response will be of type
 ## Example Usage
 
 ```php
-foreach($client->getFormEventMappings() as $formEventMapping)
+foreach($project->getFormEventMappings() as $formEventMapping)
 {
     echo <<<STRING
 Arm Num: {$formEventMapping->getArmNum()}

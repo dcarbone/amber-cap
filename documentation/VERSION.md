@@ -2,7 +2,7 @@
 
 ## Method
 ```php
-$version = $client->getREDCapVersion();
+$version = $project->getREDCapVersion();
 ```
 
 ## Response

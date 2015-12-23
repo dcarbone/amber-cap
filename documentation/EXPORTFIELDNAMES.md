@@ -2,7 +2,7 @@
 
 ## Method
 ```php
-$exportFieldNames = $client->getExportFieldNames();
+$exportFieldNames = $project->getExportFieldNames();
 ```
 
 ## Response
@@ -15,7 +15,7 @@ Response will be of type
 
 ```php
 echo '<pre>';
-foreach($client->getExportFieldNames() as $exportNameItem)
+foreach($project->getExportFieldNames() as $exportNameItem)
 {
     echo <<<STRING
 Original Field Name: {$exportNameItem['original_field_name']}
