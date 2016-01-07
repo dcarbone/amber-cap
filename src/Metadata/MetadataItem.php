@@ -332,15 +332,15 @@ class MetadataItem extends AbstractItem implements MetadataItemInterface
      */
     public function getChoiceValueByExportFieldName($exportFieldName)
     {
+        if (!isset($this->_exportFieldNames))
+            return null;
+
         $choices = $this->getFieldChoiceArray();
         if (count($choices) === 0)
             return null;
 
         if ($exportFieldName instanceof ExportFieldNameItemInterface)
             $exportFieldName = $exportFieldName['export_field_name'];
-
-        if (!isset($this->_exportFieldNames))
-            return null;
 
         if (isset($this->_exportFieldNames[$exportFieldName]))
         {

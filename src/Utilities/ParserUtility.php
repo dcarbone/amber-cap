@@ -11,13 +11,16 @@ use DCarbone\Helpers\JsonErrorHelper;
  */
 abstract class ParserUtility
 {
+    const FILETYPE_JSON = 0;
+    const FILETYPE_XML = 1;
+
     /**
      * @param CurlPlusResponseInterface $response
      * @param AbstractItemCollection $collection
      * @throws REDCapApiException
      */
-    public static function populateMetadataCollection(CurlPlusResponseInterface $response,
-                                                      AbstractItemCollection $collection)
+    public static function populateProjectMetadataCollection(CurlPlusResponseInterface $response,
+                                                             AbstractItemCollection $collection)
     {
         foreach(static::parseJsonResponse($response) as $item)
         {
@@ -37,7 +40,7 @@ abstract class ParserUtility
         if ($error === JSON_ERROR_NONE)
         {
             if (count($data) === 1 && isset($data['error']))
-                throw new REDCapApiException($data['error'], 500);
+                throw new REDCapApiException($data['error'], $response->getHttpCode());
 
             return $data;
         }
@@ -46,5 +49,10 @@ abstract class ParserUtility
             'Invalid JSON response seen.  Error: "%s"',
             JsonErrorHelper::invoke(true, $error)
         ));
+    }
+
+    public static function parseXMLResponse(CurlPlusResponseInterface $response)
+    {
+
     }
 }

@@ -32,20 +32,43 @@ class ValueUtility
      */
     private static $_invalidByteRemovalRegex = '/((?:[\x00-\x7F]|[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}){1,100})|./Sx';
 
+    /** @var array */
+    private static $_dateTestRegex = array(
+        '/(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)/' => 'Y-m-d',
+        '/(^[0-9]{2}-[0-9]{2}-[0-9]{4}$)/' => 'm-d-Y',
+        '/(^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s[0-9]{1,2}:[0-9]{2}$)/' => 'm/d/Y G:i',
+        '/(^[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}$)/' => 'Y-m-d H:i',
+        '/(^[0-9]{2}-[0-9]{2}-[0-9]{4}\s[0-9]{2}:[0-9]{2}$)/' => 'm-d-Y H:i',
+        '/(^[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2}$)/' => 'Y-m-d H:i:s',
+        '/(^[0-9]{2}-[0-9]{2}-[0-9]{4}\s[0-9]{2}:[0-9]{2}:[0-9]{2}$)/' => 'm-d-Y H:i:s',
+    );
+
     /**
-     * @param $fieldValue
+     * @param string $pattern
+     * @param string $dateTimeFormat
+     */
+    public static function addDateTimeTestPattern($pattern, $dateTimeFormat)
+    {
+        if (false === @preg_match($pattern, null))
+        {
+            $error = error_get_last();
+            throw new \LogicException(sprintf(
+                '%s::addDateTimeTestPattern - Specified pattern "%s" does not appear to be valid: ',
+                get_called_class(),
+                is_array($error) && isset($error['message']) ? $error['message'] : 'Unknown Error'
+            ));
+        }
+
+        self::$_dateTestRegex[$pattern] = $dateTimeFormat;
+    }
+
+    /**
+     * @param string $fieldValue
      * @return string|null
      */
     public static function getFieldDateTimeFormatString($fieldValue)
     {
-        static $testRegex = array(
-            '/(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)/' => 'Y-m-d',
-            '/(^[0-9]{2}\/[0-9]{2}\/[0-9]{4}\s[0-9]{1,2}:[0-9]{2}$)/' => 'm/d/Y G:i',
-            '/(^[0-9]{2}-[0-9]{2}-[0-9]{4}\s[0-9]{2}:[0-9]{2}$)/' => 'm-d-Y H:i',
-            '/(^[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}$)/' => 'Y-m-d H:i',
-        );
-
-        foreach($testRegex as $regex=>$format)
+        foreach(self::$_dateTestRegex as $regex=>$format)
         {
             if ((bool)preg_match($regex, $fieldValue))
                 return $format;

@@ -19,9 +19,13 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use DCarbone\AmberHat\ExportError\ExportError;
+use DCarbone\AmberHat\ExportError\ExportException;
 use DCarbone\AmberHat\Record\RecordFieldInterface;
+use DCarbone\AmberHat\Utilities\FileUtility;
 use DCarbone\CurlPlus\CurlPlusClient;
 use DCarbone\CurlPlus\CurlPlusClientContainerInterface;
+use DCarbone\CurlPlus\Response\CurlPlusResponseInterface;
 
 /**
  * Class AmberHatClient
@@ -71,7 +75,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     }
 
     /**
-     * Cleanup any temp files if we are not supposed to keep them.
+     * Attempt to cleanup any temp files if we are not supposed to keep them.
      */
     public function __destruct()
     {
@@ -91,7 +95,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      */
     public function exportArms(array $armNumbers = array(), $format = 'json')
     {
-        return $this->_executeRequest(
+        return $this->_executeExport(
             'arm',
             array('format' => $format, 'arms' => $armNumbers),
             false
@@ -105,7 +109,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      */
     public function exportEvents(array $armNumbers = array(), $format = 'json')
     {
-        return $this->_executeRequest(
+        return $this->_executeExport(
             'event',
             array('format' => $format, 'arms' => $armNumbers),
             false
@@ -120,7 +124,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      */
     public function exportMetadata(array $forms = array(), array $fields = array(), $format = 'json')
     {
-        return $this->_executeRequest(
+        return $this->_executeExport(
             'metadata',
             array('format' => $format, 'forms' => $forms, 'fields' => $fields),
             false
@@ -133,7 +137,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      */
     public function exportExportFieldNames($format = 'json')
     {
-        return $this->_executeRequest(
+        return $this->_executeExport(
             'exportFieldNames',
             array('format' => $format),
             false
@@ -146,7 +150,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      */
     public function exportInstruments($format = 'json')
     {
-        return $this->_executeRequest(
+        return $this->_executeExport(
             'instrument',
             array('format' => $format),
             false
@@ -159,7 +163,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      */
     public function exportFormEventMappings($format = 'json')
     {
-        return $this->_executeRequest(
+        return $this->_executeExport(
             'formEventMapping',
             array('format' => $format),
             false
@@ -172,7 +176,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      */
     public function exportUsers($format = 'json')
     {
-        return $this->_executeRequest(
+        return $this->_executeExport(
             'user',
             array('format' => $format),
             false
@@ -185,7 +189,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      */
     public function exportProjectInformation($format = 'json')
     {
-        return $this->_executeRequest(
+        return $this->_executeExport(
             'project',
             array('format' => $format),
             false
@@ -193,25 +197,39 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     }
 
     /**
+     * @param string $instrumentName
+     * @param array $fields
+     * @param array $events
+     * @return \DCarbone\CurlPlus\Response\CurlPlusFileResponse
+     */
+    public function exportInstrumentRecords($instrumentName, array $fields = array(), array $events = array())
+    {
+        return $this->_executeExport(
+            'record',
+            array(
+                'format' => 'xml',
+                'type' => 'eav',
+                'forms' => $instrumentName,
+                'events' => $events,
+                'fields' => $fields
+            ),
+            true
+        );
+    }
+
+    /**
+     * Alias as the term "form" and "instrument" is used interchangeably
+     *
+     * @see exportInstrumentRecords
+     *
      * @param string $formName
      * @param array $fields
      * @param array $events
      * @return \DCarbone\CurlPlus\Response\CurlPlusFileResponse
      */
-    public function exportFormRecords($formName,
-                                      array $fields = array(),
-                                      array $events = array())
+    public function exportFormRecords($formName, array $fields = array(), array $events = array())
     {
-        return $this->_executeRequest(
-            'record',
-            array(
-                'format' => 'xml',
-                'type' => 'eav',
-                'forms' => $formName,
-                'events' => $events,
-                'fields' => $fields
-            )
-        );
+        return $this->exportInstrumentRecords($formName, $fields, $events);
     }
 
     /**
@@ -251,7 +269,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
             ));
         }
 
-        return $this->_executeRequest(
+        return $this->_executeExport(
             'file',
             array(
                 'action' => 'export',
@@ -276,7 +294,7 @@ class AmberHatClient implements CurlPlusClientContainerInterface
     public function exportREDCapVersion()
     {
         if (null === $this->_redcapVersion)
-            $this->_redcapVersion = (string)$this->_executeRequest('version', array('format' => 'xml'), false);
+            $this->_redcapVersion = (string)$this->_executeExport('version', array('format' => 'xml'), false);
 
         return $this->_redcapVersion;
     }
@@ -308,12 +326,12 @@ class AmberHatClient implements CurlPlusClientContainerInterface
      * @return \DCarbone\CurlPlus\Response\CurlPlusResponseInterface
      * @internal param $type
      */
-    private function _executeRequest($content,
-                                     array $parameters,
-                                     $outputToFile = true,
-                                     $filename = null,
-                                     $includeHeadersInResponse = false,
-                                     $removeFileOnShutdown = true)
+    private function _executeExport($content,
+                                    array $parameters,
+                                    $outputToFile = false,
+                                    $filename = null,
+                                    $includeHeadersInResponse = false,
+                                    $removeFileOnShutdown = true)
     {
         $postFieldString = $this->_buildPostFields($content, $parameters);
 
@@ -324,13 +342,15 @@ class AmberHatClient implements CurlPlusClientContainerInterface
             ->setCurlOpt(CURLOPT_POSTFIELDS, $postFieldString)
             ->removeCurlOpt(CURLOPT_FILE);
 
-        if ($includeHeadersInResponse)
-            $this->_curlClient->setCurlOpt(CURLOPT_HEADER, true);
-        else
-            $this->_curlClient->setCurlOpt(CURLOPT_HEADER, false);
+        $error = null;
 
         if ($outputToFile)
         {
+            if ($includeHeadersInResponse)
+                $this->_curlClient->setCurlOpt(CURLOPT_HEADER, true);
+            else
+                $this->_curlClient->setCurlOpt(CURLOPT_HEADER, false);
+
             if (null === $filename)
                 $filename = sprintf('%s/%s.xml', $this->_tempDirectory, sha1($postFieldString));
 
@@ -343,8 +363,15 @@ class AmberHatClient implements CurlPlusClientContainerInterface
                     ->setCurlOpt(CURLOPT_FILE, $fh);
 
                 $response = $this->_curlClient->execute(false);
+                $code = $response->getHttpCode();
+                $error = $response->getError();
 
-                if (($error = $response->getError()) === '' && $response->getHttpCode() === 200)
+                if ('' === $error)
+                {
+
+                }
+
+                if (200 === $code && '' === $error)
                 {
                     if ($removeFileOnShutdown)
                         $this->_files[] = $filename;
@@ -353,12 +380,15 @@ class AmberHatClient implements CurlPlusClientContainerInterface
                     return $response;
                 }
 
-                throw new \RuntimeException(sprintf(
-                    'Error received when querying for "%s" content. Code: %s,  Error: "%s"',
-                    $content,
-                    $response->getHttpCode(),
-                    $error
-                ));
+                throw new \RuntimeException(
+                    sprintf(
+                        'Error received when querying for "%s" content. Code: %s,  Error: "%s"',
+                        $content,
+                        $code,
+                        $error
+                    ),
+                    500
+                );
             }
 
             throw new \RuntimeException(sprintf(
@@ -370,17 +400,61 @@ class AmberHatClient implements CurlPlusClientContainerInterface
         {
             $this->_curlClient->setCurlOpt(CURLOPT_RETURNTRANSFER, true);
 
-            $response = $this->_curlClient->execute(false);
+            $this->_executeCurl($content, $error);
 
-            if (($error = $response->getError()) === '' && $response->getHttpCode() === 200)
-                return $response;
-
-            throw new \RuntimeException(sprintf(
-                'Error received when querying for "%s" content. HTTP Code: %s, Error: "%s"',
+            return $this->_parseExportResponse(
+                $this->_curlClient->execute(false),
                 $content,
+                $postFieldString
+            );
+        }
+    }
+
+    private function _executeCurl($content, &$error, $filename = null)
+    {
+        $response = $this->_curlClient->execute(false);
+
+        $error = $response->getError();
+        $httpCode = $response->getHttpCode();
+
+        if (200 === $httpCode)
+            return $response;
+
+        if ('' !== $error)
+        {
+            $error = new ExportException(
+                $this->_curlClient->getCurlOptValue(CURLOPT_POSTFIELDS),
                 $response->getHttpCode(),
-                $error
-            ));
+                sprintf(
+                    'Error received when querying for "%s" content. Error: "%s"',
+                    $content,
+                    $error
+                )
+            );
+        }
+        else if ($filename)
+        {
+            list ($headers, $body) = FileUtility::getHeaderAndBodyFromFile($filename);
+
+            if ('' === $body)
+            {
+                $error = new ExportError(
+                    $this->_curlClient->getCurlOptValue(CURLOPT_POSTFIELDS),
+                    sprintf(
+                        'Empty response seen when querying for "%s" content.',
+                        $content
+                    ),
+                    $response->getHttpCode()
+                );
+            }
+            else
+            {
+
+            }
+        }
+        else
+        {
+
         }
     }
 

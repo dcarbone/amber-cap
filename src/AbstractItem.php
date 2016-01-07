@@ -147,7 +147,6 @@ abstract class AbstractItem implements ItemInterface
      * @link http://php.net/manual/en/arrayaccess.offsetexists.php
      * @param mixed $offset An offset to check for.
      * @return boolean true on success or false on failure.
-     * The return value will be casted to boolean if non-boolean was returned.
      * @since 5.0.0
      */
     public function offsetExists($offset)
@@ -182,10 +181,18 @@ abstract class AbstractItem implements ItemInterface
      */
     public function offsetSet($offset, $value)
     {
-        if (array_key_exists($offset, $this->properties))
+        if (is_string($offset))
+        {
             $this->properties[$offset] = $value;
+        }
         else
-            throw $this->createUnknownPropertyException($offset);
+        {
+            throw new \OutOfBoundsException(sprintf(
+                'Cannot add non-string key "%s" to %s',
+                $offset,
+                get_class($this)
+            ));
+        }
     }
 
     /**

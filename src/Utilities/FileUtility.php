@@ -10,7 +10,7 @@ abstract class FileUtility
      * @param string $tmpFilename
      * @return array
      */
-    public static function extractHeadersFromFile($tmpFilename)
+    public static function getFileResponseHeaders($tmpFilename)
     {
         if (!file_exists($tmpFilename))
         {
@@ -21,7 +21,7 @@ abstract class FileUtility
             ));
         }
 
-        $fh = fopen($tmpFilename, 'c+b');
+        $fh = fopen($tmpFilename, 'rb');
 
         if ($fh)
         {
@@ -33,14 +33,14 @@ abstract class FileUtility
             $headerNum = 0;
             $possibleHeader = array();
             $innerHeaderLineCount = 0;
-            $byteOffset = 0;
+            $bodyStartByteOffset = 0;
             while (false !== ($line = fgets($fh, 8192)))
             {
                 // If we do not have headers in the output...
-                if (0 === $lineNum && strpos($line, 'HTTP/1.') !== 0)
+                if (0 === $lineNum && 0 !== strpos($line, 'HTTP/1.'))
                 {
                     $headers = null;
-                    $byteOffset = null;
+                    $bodyStartByteOffset = null;
                     break;
                 }
 
@@ -48,7 +48,7 @@ abstract class FileUtility
                 if ($innerHeaderLineCount > 100)
                 {
                     $headers = null;
-                    $byteOffset = null;
+                    $bodyStartByteOffset = null;
                     break;
                 }
 
@@ -56,7 +56,7 @@ abstract class FileUtility
                 if ($headerNum > 0 && $line !== "\r\n" && strpos($line, 'HTTP/1.') !== 0)
                     break;
 
-                $byteOffset = ftell($fh);
+                $bodyStartByteOffset = ftell($fh);
 
                 if (($rns === 0 && substr($line, -2) === "\r\n") || $line === "\r\n")
                     $rns++;
@@ -86,11 +86,11 @@ abstract class FileUtility
 
             fclose($fh);
 
-            return array($headers, $byteOffset);
+            return array($headers, $bodyStartByteOffset);
         }
 
         throw new \RuntimeException(sprintf(
-            '%s::extractHeadersFromFile - Unable to open file "%s" for reading & writing.',
+            '%s::getFileResponseHeaders - Unable to open file "%s" for reading.',
             get_called_class(),
             $tmpFilename
         ));
@@ -98,14 +98,14 @@ abstract class FileUtility
 
     /**
      * @param string $tmpFilename
-     * @param int $contentStartOffset
+     * @param int $bodyStartByteOffset
      * @param string $outputDir
      * @param string $filename
      * @return string
      */
-    public static function removeHeadersAndMoveFile($tmpFilename, $contentStartOffset, $outputDir, $filename)
+    public static function removeHeadersAndMoveFile($tmpFilename, $bodyStartByteOffset, $outputDir, $filename)
     {
-        $tfh = fopen($tmpFilename, 'c+b');
+        $tfh = fopen($tmpFilename, 'rb');
         if ($tfh)
         {
             $outputFile = sprintf('%s/%s', rtrim($outputDir, "/\\"), $filename);
@@ -114,7 +114,7 @@ abstract class FileUtility
 
             if ($fh)
             {
-                fseek($tfh, $contentStartOffset);
+                fseek($tfh, $bodyStartByteOffset);
                 while (false === feof($tfh) && false !== ($data = fread($tfh, 8192)))
                 {
                     fwrite($fh, $data);
@@ -149,6 +149,48 @@ abstract class FileUtility
             '%s::removeHeadersAndMoveFile - Unable to open temp file "%s".',
             get_called_class(),
             $tmpFilename
+        ));
+    }
+
+    /**
+     * Returns
+     *
+     * array(
+     *  headers,
+     *  body
+     * )
+     *
+     * @param string $file
+     * @return array
+     */
+    public static function getHeaderAndBodyFromFile($file)
+    {
+        list ($headers, $byteOffset) = self::getFileResponseHeaders($file);
+
+        // If no headers were seen in the file...
+        if (null === $headers)
+            return array(null, file_get_contents($file));
+
+        $fh = fopen($file, 'rb');
+        if ($fh)
+        {
+            $body = '';
+            fseek($fh, $byteOffset);
+
+            while (false === feof($fh) && false !== ($data = fread($fh, 8192)))
+            {
+                $body = sprintf('%s%s', $body, $data);
+            }
+
+            fclose($fh);
+
+            return array($headers, $body);
+        }
+
+        throw new \RuntimeException(sprintf(
+            '%s::getHeaderAndBodyFromFile - Unable to open file "%s".',
+            get_called_class(),
+            $file
         ));
     }
 }

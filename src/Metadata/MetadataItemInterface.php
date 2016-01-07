@@ -136,7 +136,7 @@ interface MetadataItemInterface extends ItemInterface
     public function getFieldChoiceArray();
 
     /**
-     * @param string $exportFieldName
+     * @param ExportFieldNameItemInterface|string $exportFieldName
      * @return null|string
      */
     public function getChoiceValueByExportFieldName($exportFieldName);

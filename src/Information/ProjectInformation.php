@@ -41,6 +41,7 @@ class ProjectInformation extends AbstractItem implements ProjectInformationInter
         'purpose_other' => null,
         'project_notes' => null,
         'custom_record_label' => null,
+        'secondary_unique_label' => null,
         'is_longitudinal' => null,
         'surveys_enabled' => null,
         'scheduling_enabled' => null,
@@ -162,6 +163,11 @@ class ProjectInformation extends AbstractItem implements ProjectInformationInter
     public function getCustomRecordLabel()
     {
         return $this->properties['custom_record_label'];
+    }
+
+    public function getSecondaryUniqueLabel()
+    {
+        return $this->properties['secondary_unique_label'];
     }
 
     /**

@@ -80,6 +80,11 @@ interface ProjectInformationInterface extends ItemInterface
     public function getCustomRecordLabel();
 
     /**
+     * @return string
+     */
+    public function getSecondaryUniqueLabel();
+
+    /**
      * @return bool
      */
     public function isLongitudinal();

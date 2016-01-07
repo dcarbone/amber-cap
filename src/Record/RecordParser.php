@@ -200,7 +200,7 @@ class RecordParser
 
                 // Typically speaking, fields will be on a single line.
                 // However, in the event of multi-line notes content or the like,
-                // we do NOT want to create  an item per-line.
+                // we do NOT want to create an item per line.
                 case self::POS_END_OF_FIELD:
                     $field = new RecordField(
                         $this->_recordID,
@@ -227,6 +227,7 @@ class RecordParser
                         continue 2;
                     }
 
+                    // If the user wishes to have each individual field returned, end processing here.
                     if ($this->_mode === self::MODE_READ_FIELD)
                     {
                         $returnField = $this->_previousField;
@@ -234,7 +235,7 @@ class RecordParser
                         return $returnField;
                     }
 
-                    // We're still collecting fields for this record...
+                    // Otherwise determine if we're still collecting fields for this record...
                     if ($field->recordID === $this->_previousField->recordID
                         && $field->redcapEventName === $this->_previousField->redcapEventName)
                     {

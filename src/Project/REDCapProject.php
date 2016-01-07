@@ -21,9 +21,11 @@
 
 use DCarbone\AmberHat\AmberHatClient;
 use DCarbone\AmberHat\Arm\ArmsCollection;
+use DCarbone\AmberHat\Event\EventItemInterface;
 use DCarbone\AmberHat\Event\EventsCollection;
 use DCarbone\AmberHat\ExportFieldName\ExportFieldNamesCollection;
 use DCarbone\AmberHat\FormEventMapping\FormEventMappingsCollection;
+use DCarbone\AmberHat\Import\ImportRecordFactory;
 use DCarbone\AmberHat\Information\ProjectInformation;
 use DCarbone\AmberHat\Instrument\InstrumentItemInterface;
 use DCarbone\AmberHat\Instrument\InstrumentsCollection;
@@ -67,6 +69,9 @@ class REDCapProject
     /** @var array */
     private $_instrumentNames = null;
 
+    /** @var ImportRecordFactory */
+    private $_importRecordFactory;
+
     /**
      * Constructor
      *
@@ -102,7 +107,7 @@ class REDCapProject
         if (!isset($this->_arms))
         {
             $this->_arms = new ArmsCollection();
-            ParserUtility::populateMetadataCollection(
+            ParserUtility::populateProjectMetadataCollection(
                 $this->_client->exportArms(array(), 'json'),
                 $this->_arms
             );
@@ -112,18 +117,19 @@ class REDCapProject
     }
 
     /**
+     * @param bool $_buildRelationship
      * @return EventsCollection
      */
-    public function getEvents()
+    public function getEvents($_buildRelationship = false)
     {
         if (!isset($this->_events))
         {
-            if ($this->_buildRelationships)
+            if ($this->_buildRelationships || $_buildRelationship)
                 $this->_events = new EventsCollection($this->getArms());
             else
                 $this->_events = new EventsCollection();
 
-            ParserUtility::populateMetadataCollection(
+            ParserUtility::populateProjectMetadataCollection(
                 $this->_client->exportEvents(array(), 'json'),
                 $this->_events
             );
@@ -133,18 +139,19 @@ class REDCapProject
     }
 
     /**
-     * @return \DCarbone\AmberHat\Metadata\MetadataCollection
+     * @param bool $_buildRelationship
+     * @return MetadataCollection
      */
-    public function getMetadata()
+    public function getMetadata($_buildRelationship = false)
     {
         if (!isset($this->_metadata))
         {
-            if ($this->_buildRelationships)
+            if ($this->_buildRelationships || $_buildRelationship)
                 $this->_metadata = new MetadataCollection($this->getExportFieldNames(), $this->getInstruments());
             else
                 $this->_metadata = new MetadataCollection();
 
-            ParserUtility::populateMetadataCollection(
+            ParserUtility::populateProjectMetadataCollection(
                 $this->_client->exportMetadata(array(), array(), 'json'),
                 $this->_metadata
             );
@@ -162,7 +169,7 @@ class REDCapProject
         {
             $this->_instruments = new InstrumentsCollection();
 
-            ParserUtility::populateMetadataCollection(
+            ParserUtility::populateProjectMetadataCollection(
                 $this->_client->exportInstruments('json'),
                 $this->_instruments
             );
@@ -180,7 +187,7 @@ class REDCapProject
         {
             $this->_exportFieldNames = new ExportFieldNamesCollection();
 
-            ParserUtility::populateMetadataCollection(
+            ParserUtility::populateProjectMetadataCollection(
                 $this->_client->exportExportFieldNames('json'),
                 $this->_exportFieldNames
             );
@@ -190,17 +197,18 @@ class REDCapProject
     }
 
     /**
+     * @param bool $_buildRelationship
      * @return FormEventMappingsCollection
      */
-    public function getFormEventMapping()
+    public function getFormEventMapping($_buildRelationship = false)
     {
         if (!isset($this->_formEventMapping))
         {
-            if ($this->_buildRelationships)
+            if ($this->_buildRelationships || $_buildRelationship)
             {
                 $this->_formEventMapping= new FormEventMappingsCollection(
                     $this->getArms(),
-                    $this->getEvents(),
+                    $this->getEvents($_buildRelationship),
                     $this->getInstruments()
                 );
             }
@@ -209,7 +217,7 @@ class REDCapProject
                 $this->_formEventMapping = new FormEventMappingsCollection();
             }
 
-            ParserUtility::populateMetadataCollection(
+            ParserUtility::populateProjectMetadataCollection(
                 $this->_client->exportFormEventMappings('json'),
                 $this->_formEventMapping
             );
@@ -244,7 +252,7 @@ class REDCapProject
         {
             $this->_users = new UsersCollection();
 
-            ParserUtility::populateMetadataCollection(
+            ParserUtility::populateProjectMetadataCollection(
                 $this->_client->exportUsers('json'),
                 $this->_users
             );
@@ -283,18 +291,32 @@ class REDCapProject
 
     /**
      * @param InstrumentItemInterface|string $instrument
+     * @param bool $_buildRelationships
      * @return RecordParser
      */
-    public function getInstrumentRecordParser($instrument)
+    public function getInstrumentRecordParser($instrument, $_buildRelationships = false)
     {
         if ($instrument instanceof InstrumentItemInterface)
             $instrument = $instrument->getInstrumentName();
 
         return RecordParser::createWithXMLFile(
-            $this->_client->exportFormRecords($instrument),
+            $this->_client->exportInstrumentRecords($instrument),
             $instrument,
-            $this->getMetadata()
+            $this->getMetadata($_buildRelationships)
         );
+    }
+
+    /**
+     * Alias method as "form" and "instrument" are used interchangeably in REDCap
+     *
+     * @see getInstrumentRecordParser
+     *
+     * @param InstrumentItemInterface|string $form
+     * @return RecordParser
+     */
+    public function getFormRecordParser($form)
+    {
+        return $this->getInstrumentRecordParser($form);
     }
 
     /**
@@ -306,13 +328,13 @@ class REDCapProject
     {
         $tmpFilename = $this->_client->exportFile($recordField, $outputDir);
 
-        list($headers, $byteOffset) = FileUtility::extractHeadersFromFile($tmpFilename);
+        list($headers, $bodyStartByteOffset) = FileUtility::getFileResponseHeaders($tmpFilename);
 
         if (null === $headers)
         {
             trigger_error(
                 sprintf(
-                    '%s::getFile - Unable to parse headers from response, this could be cause either by a malformed response or improper CURLOPT specification.  Form Name: %s, Field Name: %s, Record ID: %s',
+                    '%s::downloadFile - Unable to parse headers from response. This could be caused by either a malformed response or an improper CURLOPT specification.  Form Name: %s, Field Name: %s, Record ID: %s',
                     get_class($this),
                     $recordField->instrumentName,
                     $recordField->fieldName,
@@ -331,7 +353,7 @@ class REDCapProject
 
             if (count($filename) === 2)
             {
-                $file = FileUtility::removeHeadersAndMoveFile($tmpFilename, $byteOffset, $outputDir, $filename[1]);
+                $file = FileUtility::removeHeadersAndMoveFile($tmpFilename, $bodyStartByteOffset, $outputDir, $filename[1]);
 
                 return new RecordFieldFile(
                     $file,
@@ -347,5 +369,31 @@ class REDCapProject
             $recordField->fieldName,
             $recordField->recordID
         ));
+    }
+
+    /**
+     * @param string $recordID
+     * @param EventItemInterface|null $event
+     * @return array|\DCarbone\AmberHat\Import\ImportRecord
+     */
+    public function createImportRecord($recordID = null, EventItemInterface $event = null)
+    {
+        if (!isset($this->_importRecordFactory))
+        {
+            $this->_importRecordFactory = new ImportRecordFactory(
+                $this->getInformation(),
+                $this->getMetadata(true),
+                $this->getFormEventMapping(true));
+        }
+
+        return $this->_importRecordFactory->createImportRecord($recordID, $event);
+    }
+
+    /**
+     * @return ImportRecordFactory
+     */
+    public function getImportRecordFactory()
+    {
+        return $this->_importRecordFactory;
     }
 }
